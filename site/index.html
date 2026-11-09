@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pharmacist Dashboard</title>
+  <meta name="description" content="Dosing calculators and clinical references for pharmacists.">
+  <meta name="theme-color" content="#3F2452">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="masthead">
+    <a class="brand" href="#renal">Pharmacist Dashboard</a>
+    <nav aria-label="Tools">
+      <a href="#renal" data-nav="renal">Kidney function</a>
+      <a href="#body" data-nav="body">Body size</a>
+      <a href="#refs" data-nav="refs">References</a>
+    </nav>
+  </header>
+  <p class="caution" role="note"><strong>Not yet reviewed.</strong> A pharmacist has not signed off on these calculations. Confirm every result before clinical use.</p>
+  <main id="app" class="layout"></main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

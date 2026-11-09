@@ -1,0 +1,15 @@
+{
+  "name": "Pharmacist Dashboard",
+  "short_name": "Pharmacist",
+  "description": "Dosing calculators and clinical references for pharmacists.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EFEDF3",
+  "theme_color": "#3F2452",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
