@@ -1,8 +1,9 @@
 // Keeps the app available offline. Bump VERSION whenever any listed file changes.
-const VERSION = 'pd-stage3-1';
+const VERSION = 'pd-stage4-1';
 const FILES = [
   './', 'index.html', 'styles.css', 'app.js', 'manifest.webmanifest',
   'calc/formulas.js', 'calc/patient.js', 'calc/registry.js', 'data/references.js',
+  'calc/convert.js', 'data/conversions.js', 'convert-view.js',
   'calc/vanco.js', 'calc/amino.js', 'data/pk.js', 'pk-view.js',
   'calc/resus.js', 'data/resus.js', 'resus-view.js',
   'fonts/atkinson-400.woff2', 'fonts/atkinson-700.woff2',

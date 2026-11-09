@@ -22,13 +22,17 @@ Dosing calculators and clinical references for pharmacists. It installs to a pho
 - Vancomycin AUC: single-level Bayesian estimate using the Goti 2018 model, or a population estimate with no level
 - Aminoglycosides: traditional and extended-interval dosing
 
+## What is in stage 4
+
+- Conversions: opioids with cross-tolerance reduction, benzodiazepines, steroids, beta blockers, ACE inhibitors, ARBs, PPIs, loop diuretics, and statin intensity
+
 ## Publishing
 
 In the repository, open Settings, then Pages, and set Source to GitHub Actions. Each push to `main` then runs the tests and publishes `site/`.
 
 ## Signing off a calculation
 
-Each entry in `site/calc/registry.js` and `site/data/resus.js` has a `review` field. After checking an entry against its sources, replace `UNREVIEWED` with:
+Each entry in `site/calc/registry.js`, `site/data/resus.js`, `site/data/pk.js`, and `site/data/conversions.js` has a `review` field. After checking an entry against its sources, replace `UNREVIEWED` with:
 
 ```js
 review: { status: 'verified', by: 'Your name, PharmD', date: 'YYYY-MM-DD' },
