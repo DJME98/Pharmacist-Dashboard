@@ -136,35 +136,6 @@ export const PEDS_TOOLS = [
     note: 'Use the dose-calculation or ideal weight. Isotonic fluid at 28 days or older, plus dextrose if intake is limited. Replace ongoing losses separately.',
     refs: ['ucsfMivf', 'feld2018'], review: UNREVIEWED,
   },
-  {
-    id: 'apap', name: 'Acetaminophen',
-    fields: [{ key: 'kg', label: 'Weight (kg)', min: 0.5, max: 150 }],
-    compute: (v) => {
-      if (v.kg > 44) return [{ label: 'Over 44 kg', value: 'Use adult dosing', unit: '' }];
-      const b = l.acetaminophenBand(v.kg);
-      return [
-        { label: 'Per-kg range', value: `${fix(v.kg * 10, 0)} to ${fix(v.kg * 15, 0)}`, unit: 'mg per dose' },
-        ...(b ? [{ label: 'Weight-band dose', value: String(b), unit: 'mg' }] : [{ label: 'Weight band', value: 'Below the table', unit: '' }]),
-      ];
-    },
-    note: 'Every 4 to 6 hours as needed, up to 5 doses a day. Confirm the product strength before giving a volume. The table starts at 3 kg.',
-    refs: ['akhDoses', 'aafpAntipyretic'], review: UNREVIEWED,
-  },
-  {
-    id: 'ibu', name: 'Ibuprofen',
-    fields: [{ key: 'kg', label: 'Weight (kg)', min: 0.5, max: 150 }, { key: 'months', label: 'Age (months)', min: 0, max: 240 }],
-    compute: (v) => {
-      if (v.months < 6) return [{ label: 'Under 6 months', value: 'Do not give unless directed by a provider', unit: '' }];
-      if (v.kg > 44) return [{ label: 'Over 44 kg', value: 'Use adult dosing', unit: '' }];
-      const b = l.ibuprofenBand(v.kg);
-      return [
-        { label: 'Per-kg range', value: `${fix(v.kg * 5, 0)} to ${fix(v.kg * 10, 0)}`, unit: 'mg per dose' },
-        ...(b ? [{ label: 'Weight-band dose', value: String(b), unit: 'mg' }] : [{ label: 'Weight band', value: 'Below the table', unit: '' }]),
-      ];
-    },
-    note: 'Every 6 to 8 hours as needed, up to 4 doses a day. Confirm the product strength before giving a volume. AAFP’s AAP summary lists 10 mg/kg per dose.',
-    refs: ['akhDoses', 'aafpAntipyretic'], review: UNREVIEWED,
-  },
 ];
 
 const scale = (anchors, max = 7) => Array.from({ length: max + 1 }, (_, n) => [n, anchors[n] ? `${n}: ${anchors[n]}` : String(n)]);

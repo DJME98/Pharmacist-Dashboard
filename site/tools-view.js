@@ -8,7 +8,7 @@ import { dripRate } from './calc/labs.js';
 // Entries are held only in these objects and are never stored or sent.
 const values = {};
 const scores = {};
-const tab = { labs: LAB_TOOLS[0].id, peds: PEDS_TOOLS[0].id, scores: SCORES[0].id, care: 'rsi' };
+const tab = { labs: LAB_TOOLS[0].id, peds: PEDS_TOOLS[0].id, scores: SCORES[0].id, care: 'status' };
 const care = { weight: '' };
 const drip = { dose: '', doseUnit: 'mcg/kg/min', kg: '', amount: '', amountUnit: 'mg', volume: '' };
 

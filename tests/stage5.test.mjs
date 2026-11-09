@@ -78,18 +78,6 @@ test('maintenance fluids', () => {
   assert.equal(l.maintenanceFluids(100).capped, true);
 });
 
-test('weight bands', () => {
-  assert.equal(l.acetaminophenBand(2.9), null);
-  assert.equal(l.acetaminophenBand(3), 40);
-  assert.equal(l.acetaminophenBand(10.9), 120);
-  assert.equal(l.acetaminophenBand(11), 160);
-  assert.equal(l.acetaminophenBand(44), 480);
-  assert.equal(l.ibuprofenBand(5), null);
-  assert.equal(l.ibuprofenBand(5.5), 50);
-  assert.equal(l.ibuprofenBand(31.9), 250);
-  assert.equal(l.ibuprofenBand(44), 300);
-});
-
 test('drip rates', () => {
   close(l.dripRate({ dose: 0.1, doseUnit: 'mcg/kg/min', kg: 80, amount: 4, amountUnit: 'mg', volumeMl: 250 }), 30);
   close(l.dripRate({ dose: 0.03, doseUnit: 'units/min', amount: 20, amountUnit: 'units', volumeMl: 100 }), 9);
@@ -100,8 +88,6 @@ test('drip rates', () => {
 });
 
 test('critical care doses and caps', () => {
-  assert.equal(dose('rsi', 'etomidate', 'Dose', 80).dose, '24 mg');
-  assert.equal(dose('rsi', 'sux', 'Dose', 100).dose, '60 to 150 mg');
   assert.equal(dose('status', 'lorazepam', 'Dose', 20).dose, '2 mg');
   assert.equal(dose('status', 'lorazepam', 'Dose', 80).dose, '4 mg');
   assert.equal(dose('status', 'lorazepam', 'Dose', 80).flag, 'max');
@@ -111,20 +97,12 @@ test('critical care doses and caps', () => {
   assert.equal(dose('status', 'pb-urgent', 'Dose', 30).dose, '1000 mg');
   assert.equal(dose('anaphylaxis', 'epi-im', 'Weight-based', 20).dose, '0.2 mg');
   assert.equal(dose('anaphylaxis', 'epi-im', 'Weight-based', 80).dose, '0.5 mg');
-  assert.equal(dose('antidotes', 'nac', 'Bag 1, over 1 h', 70).dose, '10500 mg');
-  assert.equal(dose('antidotes', 'fomepizole', 'Load', 70).dose, '1050 mg');
-  assert.equal(dose('antidotes', 'hydroxo', 'Pediatric', 100).dose, '5000 mg');
-  assert.equal(dose('pressors', 'norepi', 'Rate', 80).dose, '4 to 40 mcg/min');
-  assert.equal(dose('pressors', 'milri', 'Load over 10 min', 80).dose, '4000 mcg');
 });
 
 test('tool outputs', () => {
   const phen = tool(LAB_TOOLS, 'phenytoin').compute({ level: 8, albumin: 2, renal: 'yes' });
   assert.equal(phen[0].value, '26.7');
   assert.equal(phen[1].value, '16');
-  assert.equal(tool(PEDS_TOOLS, 'apap').compute({ kg: 50 })[0].value, 'Use adult dosing');
-  assert.equal(tool(PEDS_TOOLS, 'ibu').compute({ kg: 8, months: 3 })[0].label, 'Under 6 months');
-  assert.equal(tool(PEDS_TOOLS, 'ibu').compute({ kg: 10, months: 12 })[0].value, '50 to 100');
 });
 
 test('score item point maximums', () => {
@@ -170,6 +148,12 @@ test('insulin rules', () => {
 test('weight limits for critical care', () => {
   assert.equal(parseWeight('80', 'care').kg, 80);
   assert.ok(parseWeight('0.1', 'care').error);
+});
+
+test('removed sections stay out', () => {
+  assert.deepEqual(CARE_SECTIONS.map((x) => x.id), ['status', 'anaphylaxis']);
+  assert.deepEqual(PEDS_TOOLS.map((x) => x.id), ['mivf']);
+  for (const id of ['ucsfRsi', 'nychhcPressors', 'aha2023Tox', 'gpnotebookK', 'akhDoses']) assert.equal(REFERENCES[id], undefined, id);
 });
 
 test('no anticoagulant reversal is listed', () => {

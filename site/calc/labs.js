@@ -50,15 +50,6 @@ export function maintenanceFluids(kg) {
   return { hourly: Math.min(hourly, 120), daily, capped: hourly > 120 };
 }
 
-// Weight bands are published mg amounts. Upper bound is exclusive.
-const ACETAMINOPHEN_BANDS = [[3, 4, 40], [4, 5.5, 60], [5.5, 8, 80], [8, 11, 120], [11, 16, 160], [16, 22, 240], [22, 32, 320], [32, 44.01, 480]];
-const IBUPROFEN_BANDS = [[5.5, 8, 50], [8, 11, 75], [11, 16, 100], [16, 22, 150], [22, 27, 200], [27, 32, 250], [32, 44.01, 300]];
-
-const band = (bands, kg) => bands.find(([lo, hi]) => kg >= lo && kg < hi)?.[2] ?? null;
-
-export const acetaminophenBand = (kg) => band(ACETAMINOPHEN_BANDS, kg);
-export const ibuprofenBand = (kg) => band(IBUPROFEN_BANDS, kg);
-
 const DOSE_TO_MASS_PER_MIN = { 'mcg/kg/min': 1, 'mcg/min': 1 };
 
 // Infusion rate in mL/h from a dose and a bag.

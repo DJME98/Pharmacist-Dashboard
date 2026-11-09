@@ -28,10 +28,10 @@ Dosing calculators and clinical references for pharmacists. It installs to a pho
 
 ## What is in stage 5
 
-- Critical care: RSI, vasopressors, drip rates, antidotes, hyperkalemia, status epilepticus, and anaphylaxis
+- Critical care: status epilepticus, anaphylaxis, and drip rates
 - Labs: phenytoin, calcium, sodium, free water deficit, anion gap, osmolality, iron deficit, QTc, and MELD 3.0
 - Scores: CHA2DS2-VASc, HAS-BLED, Child-Pugh, CIWA-Ar, and COWS
-- Pediatrics: maintenance fluids, acetaminophen, and ibuprofen
+- Pediatrics: maintenance fluids
 - Anticoagulation dosing and reversal are not included yet
 
 ## Publishing
