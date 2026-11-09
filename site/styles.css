@@ -151,6 +151,53 @@ input[aria-invalid="true"] { border-color: var(--danger); border-width: 2px; }
   .readout { padding: 20px 16px 56px; }
   .result-head { flex-wrap: wrap; }
 }
+
+/* ACLS and PALS */
+.layout.code { display: block; padding: 24px 16px 72px; }
+.code-head { display: flex; flex-wrap: wrap; gap: 12px 40px; align-items: flex-start; margin-bottom: 18px; }
+.code-head h1 { font-size: 2rem; line-height: 1.15; }
+.field.kg { flex: 1 1 280px; max-width: 420px; }
+.field.kg .control input { max-width: 140px; }
+.hint { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+.code-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.algo-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.algo-picker button, .branches button, .trail-actions button { font: inherit; cursor: pointer; border-radius: 6px; }
+.algo-picker button { background: var(--surface); color: var(--ink); border: 1px solid var(--rule); padding: 8px 12px; }
+.algo-picker button[aria-pressed="true"] { background: var(--plum); color: var(--on-plum); border-color: var(--plum); font-weight: 700; }
+.trail { list-style: none; margin: 0; padding: 0; }
+.step { position: relative; padding: 0 0 18px 22px; border-left: 3px solid var(--rule); }
+.step::before { content: ""; position: absolute; left: -8px; top: 5px; width: 13px; height: 13px; border-radius: 50%; background: var(--rule); }
+.step.now { border-left-color: var(--plum-ink); }
+.step.now::before { background: var(--plum-ink); }
+.step h3 { font-size: 1.15rem; margin-bottom: 4px; }
+.step ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.step:not(.now) ul { color: var(--muted); font-size: .95rem; }
+.ask { font-weight: 700; margin-top: 12px; }
+.branches { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.branches button { background: var(--plum); color: var(--on-plum); border: 0; padding: 12px 16px; font-weight: 700; min-height: 48px; }
+.chose { margin-top: 6px; font-weight: 700; color: var(--plum-ink); font-size: .95rem; }
+.trail-actions { display: flex; gap: 14px; margin: 2px 0 14px; }
+.trail-actions button { background: none; border: 0; color: var(--plum-ink); text-decoration: underline; padding: 4px 0; }
+.sources { font-size: .88rem; margin-top: 6px; }
+.sources summary { cursor: pointer; color: var(--plum-ink); text-decoration: underline; }
+.sources ol { margin-top: 6px; }
+.dose { padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.dose-name { font-weight: 700; font-size: 1.05rem; }
+.route { font-weight: 400; color: var(--muted); font-size: .88rem; margin-left: 8px; }
+.dose dl { display: grid; grid-template-columns: minmax(0, 11em) minmax(0, 1fr); gap: 3px 12px; margin: 6px 0 0; }
+.dose dt { color: var(--muted); font-size: .92rem; }
+.dose dd { margin: 0; overflow-wrap: anywhere; }
+.dose dd b { font-size: 1.08rem; }
+.basis { display: block; font-size: .84rem; color: var(--muted); }
+.capped { font-size: .8rem; font-weight: 700; color: var(--warn-ink); background: var(--warn-bg); padding: 1px 6px; margin-left: 8px; }
+.dose-note { font-size: .92rem; margin-top: 6px; }
+.dose-status { font-size: .8rem; color: var(--warn-ink); margin-top: 4px; }
+@media (max-width: 800px) {
+  .code-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .dose dl { grid-template-columns: minmax(0, 1fr); }
+  .dose dd { margin-bottom: 6px; }
+}
+
 @media print {
   .masthead nav, .patient .clear, .more { display: none; }
 }

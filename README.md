@@ -11,13 +11,19 @@ Dosing calculators and clinical references for pharmacists. It installs to a pho
 - eGFR: CKD-EPI creatinine, cystatin C, and combined; EKFC; bedside Schwartz; CKiD U25; and the term neonatal equation
 - A searchable reference list that says how far each source was checked
 
+## What is in stage 2
+
+- ACLS and PALS algorithms you step through: cardiac arrest, bradycardia, tachycardia, and post-arrest care
+- PALS doses and shocks calculated from weight, with caps; ACLS doses flat except weight-based drugs
+- Sources and review status on every dose and algorithm
+
 ## Publishing
 
 In the repository, open Settings, then Pages, and set Source to GitHub Actions. Each push to `main` then runs the tests and publishes `site/`.
 
 ## Signing off a calculation
 
-Each entry in `site/calc/registry.js` has a `review` field. After checking an entry against its sources, replace `UNREVIEWED` with:
+Each entry in `site/calc/registry.js` and `site/data/resus.js` has a `review` field. After checking an entry against its sources, replace `UNREVIEWED` with:
 
 ```js
 review: { status: 'verified', by: 'Your name, PharmD', date: 'YYYY-MM-DD' },
