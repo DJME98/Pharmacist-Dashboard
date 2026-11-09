@@ -24,7 +24,15 @@ Dosing calculators and clinical references for pharmacists. It installs to a pho
 
 ## What is in stage 4
 
-- Conversions: opioids with cross-tolerance reduction, benzodiazepines, steroids, beta blockers, ACE inhibitors, ARBs, PPIs, loop diuretics, and statin intensity
+- Conversions: opioids with cross-tolerance reduction, benzodiazepines, steroids, beta blockers, ACE inhibitors, ARBs, PPIs, antipsychotics, loop diuretics, statin intensity, basal insulin, and IV to PO
+
+## What is in stage 5
+
+- Critical care: RSI, vasopressors, drip rates, antidotes, hyperkalemia, status epilepticus, and anaphylaxis
+- Labs: phenytoin, calcium, sodium, free water deficit, anion gap, osmolality, iron deficit, QTc, and MELD 3.0
+- Scores: CHA2DS2-VASc, HAS-BLED, Child-Pugh, CIWA-Ar, and COWS
+- Pediatrics: maintenance fluids, acetaminophen, and ibuprofen
+- Anticoagulation dosing and reversal are not included yet
 
 ## Publishing
 
@@ -32,7 +40,7 @@ In the repository, open Settings, then Pages, and set Source to GitHub Actions. 
 
 ## Signing off a calculation
 
-Each entry in `site/calc/registry.js`, `site/data/resus.js`, `site/data/pk.js`, and `site/data/conversions.js` has a `review` field. After checking an entry against its sources, replace `UNREVIEWED` with:
+Each entry in `site/calc/registry.js`, `site/data/resus.js`, `site/data/pk.js`, `site/data/conversions.js`, `site/data/care.js`, and `site/data/tools.js` has a `review` field. After checking an entry against its sources, replace `UNREVIEWED` with:
 
 ```js
 review: { status: 'verified', by: 'Your name, PharmD', date: 'YYYY-MM-DD' },

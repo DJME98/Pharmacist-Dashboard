@@ -1,4 +1,5 @@
-import { OPIOIDS, OPIOID_ITEM, RATIO_TABLES, STATINS, STATIN_ITEM, INTENSITY_LABEL } from './data/conversions.js';
+import { put } from './dom.js';
+import { OPIOIDS, OPIOID_ITEM, RATIO_TABLES, STATINS, STATIN_ITEM, INTENSITY_LABEL, BASAL_RULES, INSULIN_ITEM, IVPO, IVPO_EXCLUSIONS, IVPO_ITEM } from './data/conversions.js';
 import { REFERENCES } from './data/references.js';
 import { convertDose, fentanylPatch, formatRange, opioidSummary, opioidTarget, statinIntensity } from './calc/convert.js';
 import { formatNumber } from './calc/resus.js';
@@ -10,7 +11,9 @@ const state = {
   target: 'hydromorphone-po',
   reduction: '33',
   perDay: '',
-  ratio: Object.fromEntries(RATIO_TABLES.map((t) => [t.id, { from: t.drugs[0].id, dose: '' }])),
+  ratio: Object.fromEntries(RATIO_TABLES.map((t) => [t.id, { from: t.drugs[0].id, dose: '', method: t.methods?.[0].id }])),
+  insulinRule: BASAL_RULES[0].id,
+  insulinDose: '',
   statin: 'atorvastatin',
   statinDose: '40',
 };
@@ -51,8 +54,8 @@ export function renderConvert(h, mount) {
     hint && h('p', { class: 'hint' }, hint));
 
   function drawTabs() {
-    const list = [['opioids', 'Opioids'], ...RATIO_TABLES.map((t) => [t.id, t.name]), ['statin', 'Statins']];
-    tabs.replaceChildren(...list.map(([id, name]) => h('button', {
+    const list = [['opioids', 'Opioids'], ...RATIO_TABLES.map((t) => [t.id, t.name]), ['statin', 'Statins'], ['insulin', 'Insulin'], ['ivpo', 'IV to PO']];
+    put(tabs, ...list.map(([id, name]) => h('button', {
       type: 'button', 'aria-pressed': String(state.tab === id),
       onclick: () => { state.tab = id; drawTabs(); drawBody(); },
     }, name)));
@@ -61,20 +64,25 @@ export function renderConvert(h, mount) {
   function drawRatio(table) {
     const s = state.ratio[table.id];
     const out = h('div', { class: 'conv-out' });
+    const drugs = table.methods
+      ? table.drugs.filter((d) => d.equivs[s.method] !== undefined).map((d) => ({ ...d, equiv: d.equivs[s.method] }))
+      : table.drugs;
+    if (!drugs.some((d) => d.id === s.from)) s.from = drugs[0].id;
     const calc = () => {
       const dose = num(s.dose);
-      const from = table.drugs.find((d) => d.id === s.from);
-      if (dose === null) { out.replaceChildren(h('p', { class: 'empty' }, 'Enter a dose to see the equivalents.')); return; }
-      if (Number.isNaN(dose)) { out.replaceChildren(h('p', { class: 'alert stop' }, 'Enter a positive number.')); return; }
-      out.replaceChildren(h('ul', { class: 'results' }, table.drugs.filter((d) => d.id !== s.from).map((d) => h('li', { class: 'conv-row' },
+      const from = drugs.find((d) => d.id === s.from);
+      if (dose === null) { put(out, h('p', { class: 'empty' }, 'Enter a dose to see the equivalents.')); return; }
+      if (Number.isNaN(dose)) { put(out, h('p', { class: 'alert stop' }, 'Enter a positive number.')); return; }
+      put(out, h('ul', { class: 'results' }, drugs.filter((d) => d.id !== s.from).map((d) => h('li', { class: 'conv-row' },
         h('div', {}, h('span', {}, d.name), d.detail && h('span', { class: 'basis' }, d.detail)),
         h('b', {}, formatRange(convertDose(dose, from.equiv, d.equiv), table.unit))))));
     };
-    body.replaceChildren(
+    put(body, 
       h('p', {}, table.intro),
       h('p', { class: 'alert' }, table.caution),
       h('div', { class: 'pk-grid' },
-        select('from', 'Convert from', s.from, table.drugs.map((d) => [d.id, d.name]), (v) => { s.from = v; calc(); }),
+        table.methods && select('method', 'Method', s.method, table.methods.map((m) => [m.id, m.label]), (v) => { s.method = v; drawRatio(table); }),
+        select('from', 'Convert from', s.from, drugs.map((d) => [d.id, d.name]), (v) => { s.from = v; calc(); }),
         input('dose', `Dose (${table.unit})`, s.dose, (v) => { s.dose = v; calc(); })),
       out,
       ...footer(table));
@@ -86,7 +94,7 @@ export function renderConvert(h, mount) {
     const doseWrap = h('div', {});
     const calc = () => {
       const r = statinIntensity(STATINS, state.statin, state.statinDose);
-      out.replaceChildren(
+      put(out, 
         h('p', { class: 'basis-line' }, INTENSITY_LABEL[r.intensity]),
         h('ul', { class: 'results' }, r.matches.map((m) => h('li', { class: 'conv-row' },
           h('span', {}, m.name), h('b', {}, `${m.doses.join(', ')} mg`)))));
@@ -95,9 +103,9 @@ export function renderConvert(h, mount) {
       const drug = STATINS.find((d) => d.id === state.statin);
       const options = Object.keys(drug.doses);
       if (!options.includes(state.statinDose)) [state.statinDose] = options;
-      doseWrap.replaceChildren(select('statin-dose', 'Daily dose', state.statinDose, options.map((d) => [d, `${d} mg`]), (v) => { state.statinDose = v; calc(); }));
+      put(doseWrap, select('statin-dose', 'Daily dose', state.statinDose, options.map((d) => [d, `${d} mg`]), (v) => { state.statinDose = v; calc(); }));
     };
-    body.replaceChildren(
+    put(body, 
       h('p', {}, 'Statins are grouped by LDL-lowering intensity. These groups are not exact dose equivalents.'),
       h('div', { class: 'pk-grid' },
         select('statin', 'Statin', state.statin, STATINS.map((d) => [d.id, d.name]), (v) => { state.statin = v; drawDose(); calc(); }),
@@ -114,9 +122,9 @@ export function renderConvert(h, mount) {
 
     const calc = () => {
       const parsed = state.opioidRows.map((r) => ({ drug: r.drug, dose: num(r.dose) }));
-      if (parsed.some((r) => Number.isNaN(r.dose))) { out.replaceChildren(h('p', { class: 'alert stop' }, 'Enter positive numbers for each dose.')); return; }
+      if (parsed.some((r) => Number.isNaN(r.dose))) { put(out, h('p', { class: 'alert stop' }, 'Enter positive numbers for each dose.')); return; }
       const rows = parsed.filter((r) => r.dose !== null);
-      if (!rows.length) { out.replaceChildren(h('p', { class: 'empty' }, 'Enter the 24-hour total for each current opioid, including breakthrough doses.')); return; }
+      if (!rows.length) { put(out, h('p', { class: 'empty' }, 'Enter the 24-hour total for each current opioid, including breakthrough doses.')); return; }
       const summary = opioidSummary(rows, OPIOIDS);
       const target = OPIOIDS.find((o) => o.id === state.target);
       const reduction = Number(state.reduction);
@@ -151,11 +159,11 @@ export function renderConvert(h, mount) {
             h('div', { class: 'stat' }, h('span', { class: 'stat-label' }, 'Breakthrough, up to'), h('b', {}, formatNumber(r.rescue)), h('span', { class: 'unit' }, `${target.unit} q3 to 4 h PRN`))),
           h('p', { class: 'hint' }, 'Estimate. Choose the most conservative ratio that fits, then titrate to response. If pain is poorly controlled, a smaller reduction or none may be appropriate. Use lower doses in older adults and in severe renal or hepatic disease.'));
       }
-      out.replaceChildren(...parts.filter(Boolean));
+      put(out, ...parts.filter(Boolean));
     };
 
     const drawRows = () => {
-      rowsEl.replaceChildren(...state.opioidRows.map((row, i) => {
+      put(rowsEl, ...state.opioidRows.map((row, i) => {
         const d = OPIOIDS.find((o) => o.id === row.drug);
         return h('div', { class: 'pk-grid' },
           select(`op-drug-${i}`, `Current opioid ${state.opioidRows.length > 1 ? i + 1 : ''}`.trim(), row.drug, OPIOIDS.map((o) => [o.id, o.name]), (v) => { row.drug = v; drawRows(); calc(); }),
@@ -164,7 +172,7 @@ export function renderConvert(h, mount) {
       }));
     };
 
-    body.replaceChildren(
+    put(body, 
       rowsEl,
       h('button', { type: 'button', class: 'link-btn', onclick: () => { state.opioidRows.push({ drug: 'morphine-po', dose: '' }); drawRows(); calc(); } }, 'Add another opioid'),
       h('div', { class: 'pk-grid conv-settings' },
@@ -177,13 +185,48 @@ export function renderConvert(h, mount) {
     calc();
   }
 
+  function drawInsulin() {
+    const out = h('div', { class: 'conv-out' });
+    const calc = () => {
+      const dose = num(state.insulinDose);
+      const rule = BASAL_RULES.find((r) => r.id === state.insulinRule);
+      if (dose === null) { put(out, h('p', { class: 'empty' }, 'Enter the current total daily basal dose.')); return; }
+      if (Number.isNaN(dose)) { put(out, h('p', { class: 'alert stop' }, 'Enter a positive number.')); return; }
+      put(out, 
+        h('div', { class: 'pk-hero' }, h('p', { class: 'hero-label' }, 'Starting total daily dose'),
+          h('p', { class: 'hero-value' }, formatRange(rule.pct.map((p) => (dose * p) / 100), 'units'))),
+        rule.note && h('p', { class: 'hint' }, rule.note));
+    };
+    put(body, 
+      h('p', { class: 'alert' }, 'Starting points only. Monitor glucose closely and use conservative doses in older adults.'),
+      h('div', { class: 'pk-grid' },
+        select('ins-rule', 'Conversion', state.insulinRule, BASAL_RULES.map((r) => [r.id, r.label]), (v) => { state.insulinRule = v; calc(); }),
+        input('ins-dose', 'Current total daily dose (units)', state.insulinDose, (v) => { state.insulinDose = v; calc(); })),
+      out,
+      ...footer(INSULIN_ITEM));
+    calc();
+  }
+
+  function drawIvpo() {
+    put(body, 
+      h('p', {}, 'Antimicrobial IV to oral switches from two hospital protocols. Azoles generally need loading doses when started.'),
+      h('div', { class: 'scroll' }, h('table', { class: 'data ivpo' },
+        h('thead', {}, h('tr', {}, ['Drug', 'IV', 'Oral'].map((t) => h('th', { scope: 'col' }, t)))),
+        h('tbody', {}, IVPO.map((r) => h('tr', {}, h('td', {}, r.drug, r.note && h('span', { class: 'basis' }, r.note)), h('td', {}, r.iv), h('td', {}, r.po)))))),
+      h('h2', {}, 'Do not switch if'),
+      h('ul', { class: 'plain' }, IVPO_EXCLUSIONS.map((e) => h('li', {}, e))),
+      ...footer(IVPO_ITEM));
+  }
+
   function drawBody() {
     if (state.tab === 'opioids') drawOpioids();
     else if (state.tab === 'statin') drawStatin();
+    else if (state.tab === 'insulin') drawInsulin();
+    else if (state.tab === 'ivpo') drawIvpo();
     else drawRatio(RATIO_TABLES.find((t) => t.id === state.tab));
   }
 
-  mount.replaceChildren(h('h1', {}, 'Conversions'), tabs, body);
+  put(mount, h('h1', {}, 'Conversions'), tabs, body);
   drawTabs();
   drawBody();
 }

@@ -235,6 +235,16 @@ table.data th:first-child, table.data td:first-child { text-align: left; padding
 .opioid-rows { display: grid; gap: 10px; }
 .link-btn { background: none; border: 0; color: var(--plum-ink); text-decoration: underline; font: inherit; padding: 6px 0; cursor: pointer; justify-self: start; align-self: end; }
 
+
+/* Stage 5 */
+.score-list { display: grid; gap: 10px; margin: 8px 0 14px; }
+.check-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--rule); cursor: pointer; }
+.check-row input { width: 20px; height: 20px; flex: none; }
+.check-row span:nth-child(2) { flex: 1; }
+.layout.single h2 { font-size: 1.15rem; margin: 14px 0 8px; }
+table.data.ivpo td, table.data.ivpo th { text-align: left; white-space: normal; }
+.conv-row b .unit { font-weight: 400; }
+
 @media print {
   .masthead nav, .patient .clear, .more { display: none; }
 }

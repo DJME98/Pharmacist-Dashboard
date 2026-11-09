@@ -1,3 +1,4 @@
+import { put } from './dom.js';
 import { emptyRaw, normalize } from './calc/patient.js';
 import { CALCULATIONS, evaluate } from './calc/registry.js';
 import { REFERENCES, REFERENCES_ACCESSED, CHECK_LABELS } from './data/references.js';
@@ -7,6 +8,9 @@ import { PK_ITEMS } from './data/pk.js';
 import { renderVanco, renderAmino } from './pk-view.js';
 import { CONVERSION_ITEMS } from './data/conversions.js';
 import { renderConvert } from './convert-view.js';
+import { CARE_ITEMS } from './data/care.js';
+import { TOOL_ITEMS } from './data/tools.js';
+import { renderTools, renderCare } from './tools-view.js';
 
 // Patient values live only in this variable. They are never stored or sent.
 const raw = emptyRaw();
@@ -187,9 +191,9 @@ function update() {
     }
   });
   if (alertsEl) {
-    alertsEl.replaceChildren(...warnings.map((w) => h('p', { class: 'alert' }, w)));
+    put(alertsEl, ...warnings.map((w) => h('p', { class: 'alert' }, w)));
   }
-  if (resultsEl) resultsEl.replaceChildren(...[results(currentPage, p)].flat(2).filter(Boolean));
+  if (resultsEl) put(resultsEl, ...[results(currentPage, p)].flat(2).filter(Boolean));
   if (pkUpdate) pkUpdate(p);
 }
 
@@ -201,7 +205,7 @@ function referencesPage() {
       list.querySelectorAll('li').forEach((li) => { li.hidden = q !== '' && !li.textContent.toLowerCase().includes(q); });
     },
   });
-  const usedBy = (id) => [...CALCULATIONS, ...RESUS_ITEMS, ...PK_ITEMS, ...CONVERSION_ITEMS].filter((c) => c.refs.includes(id)).map((c) => (c.kind === 'acls' || c.kind === 'pals' ? `${c.kind.toUpperCase()} ${c.name.toLowerCase()} algorithm` : c.name));
+  const usedBy = (id) => [...CALCULATIONS, ...RESUS_ITEMS, ...PK_ITEMS, ...CONVERSION_ITEMS, ...CARE_ITEMS, ...TOOL_ITEMS].filter((c) => c.refs.includes(id)).map((c) => (c.kind === 'acls' || c.kind === 'pals' ? `${c.kind.toUpperCase()} ${c.name.toLowerCase()} algorithm` : c.name));
   const entries = Object.entries(REFERENCES).sort((a, b) => a[1].cite.localeCompare(b[1].cite));
   const list = h('ul', { class: 'ref-list' }, entries.map(([id, r]) => h('li', {},
     h('p', { class: 'ref-cite' }, r.url ? h('a', { href: r.url, target: '_blank', rel: 'noopener' }, r.cite) : r.cite),
@@ -215,7 +219,7 @@ function referencesPage() {
 
 function route() {
   const page = (location.hash || '#renal').slice(1);
-  currentPage = ['renal', 'body', 'acls', 'pals', 'vanco', 'amino', 'convert', 'refs'].includes(page) ? page : 'renal';
+  currentPage = ['renal', 'body', 'acls', 'pals', 'vanco', 'amino', 'convert', 'care', 'labs', 'scores', 'peds', 'refs'].includes(page) ? page : 'renal';
   pkUpdate = null;
   document.querySelectorAll('[data-nav]').forEach((a) => {
     if (a.dataset.nav === currentPage) a.setAttribute('aria-current', 'page');
@@ -226,6 +230,20 @@ function route() {
     alertsEl = null;
     app.className = 'layout code';
     renderResus(h, currentPage, app);
+    return;
+  }
+  if (currentPage === 'care') {
+    resultsEl = null;
+    alertsEl = null;
+    app.className = 'layout code';
+    renderCare(h, app);
+    return;
+  }
+  if (currentPage === 'labs' || currentPage === 'scores' || currentPage === 'peds') {
+    resultsEl = null;
+    alertsEl = null;
+    app.className = 'layout single';
+    renderTools(h, currentPage, app);
     return;
   }
   if (currentPage === 'convert') {
@@ -240,7 +258,7 @@ function route() {
     app.className = 'layout';
     alertsEl = h('div', { class: 'alerts', role: 'status' });
     const body = h('div', {});
-    app.replaceChildren(patientPanel(),
+    put(app, patientPanel(),
       h('div', { class: 'readout' },
         h('h1', {}, currentPage === 'vanco' ? 'Vancomycin' : 'Aminoglycosides'),
         alertsEl, body));
@@ -252,13 +270,13 @@ function route() {
     resultsEl = null;
     alertsEl = null;
     app.className = 'layout single';
-    app.replaceChildren(referencesPage());
+    put(app, referencesPage());
     return;
   }
   app.className = 'layout';
   alertsEl = h('div', { class: 'alerts', role: 'status' });
   resultsEl = h('div', { class: 'output' });
-  app.replaceChildren(patientPanel(),
+  put(app, patientPanel(),
     h('div', { class: 'readout' },
       h('h1', {}, currentPage === 'renal' ? 'Kidney function' : 'Body size'),
       alertsEl, resultsEl));

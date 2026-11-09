@@ -1,3 +1,4 @@
+import { put } from './dom.js';
 import { bmi } from './calc/formulas.js';
 import {
   MODEL, TARGET, buildHistory, concentrationAt, crclForModel, fitOneLevel, individualParams,
@@ -113,7 +114,7 @@ export function renderVanco(h, mount) {
         type: 'checkbox', checked: vanco.dialysis, onchange: (e) => { vanco.dialysis = e.target.checked; draw(); },
       }), h('span', {}, 'On dialysis or CRRT'))));
 
-  mount.replaceChildren(form, output);
+  put(mount, form, output);
 
   function dialysisNote() {
     return [
@@ -130,13 +131,13 @@ export function renderVanco(h, mount) {
 
   function draw() {
     const p = patient;
-    if (vanco.dialysis) { output.replaceChildren(...dialysisNote()); return; }
+    if (vanco.dialysis) { put(output, ...dialysisNote()); return; }
     if (!p || p.ageY === null || p.sex === null || p.heightCm === null || p.weightKg === null || p.scr === null) {
-      output.replaceChildren(h('p', { class: 'empty' }, 'Enter age, sex, height, weight, and SCr to see an estimate.'));
+      put(output, h('p', { class: 'empty' }, 'Enter age, sex, height, weight, and SCr to see an estimate.'));
       return;
     }
     if (p.ageY < 18) {
-      output.replaceChildren(h('p', { class: 'empty' }, 'This calculator is for adults. The model has not been set up for children here.'));
+      put(output, h('p', { class: 'empty' }, 'This calculator is for adults. The model has not been set up for children here.'));
       return;
     }
     const { v, errors, warnings, regimen, canFit } = checkVanco(vanco);
@@ -163,7 +164,7 @@ export function renderVanco(h, mount) {
     const load = loadingRange(p.weightKg, bmi(p.weightKg, p.heightCm));
     const auc = current?.auc24;
 
-    output.replaceChildren(
+    put(output, 
       h('div', { class: 'alerts', role: 'status' },
         errors.map((e) => h('p', { class: 'alert stop' }, e)), allWarnings.map((w) => h('p', { class: 'alert' }, w))),
       h('p', { class: 'basis-line' }, fit ? 'Individualized from one level' : 'Population estimate: no level entered'),
@@ -217,16 +218,16 @@ export function renderAmino(h, mount) {
     textField(h, amino, 'trough', 'Goal trough, mcg/mL (optional)', change),
     textField(h, amino, 'tinf', 'Infusion time, hours', change)));
 
-  mount.replaceChildren(form, output);
+  put(mount, form, output);
 
   function draw() {
     const p = patient;
     if (!p || p.ageY === null || p.sex === null || p.heightCm === null || p.weightKg === null || p.scr === null) {
-      output.replaceChildren(h('p', { class: 'empty' }, 'Enter age, sex, height, weight, and SCr to see an estimate.'));
+      put(output, h('p', { class: 'empty' }, 'Enter age, sex, height, weight, and SCr to see an estimate.'));
       return;
     }
     if (p.ageY < 18) {
-      output.replaceChildren(h('p', { class: 'empty' }, 'This calculator is for adults.'));
+      put(output, h('p', { class: 'empty' }, 'This calculator is for adults.'));
       return;
     }
     const tinf = num(amino.tinf);
@@ -234,7 +235,7 @@ export function renderAmino(h, mount) {
     const peak = num(amino.peak) ?? defaults.peak;
     const trough = num(amino.trough) ?? defaults.trough;
     if (![tinf, peak, trough].every((x) => x !== null && Number.isFinite(x) && x > 0) || trough >= peak || tinf >= 12) {
-      output.replaceChildren(h('p', { class: 'alert stop' }, 'Enter a positive infusion time under 12 hours and a goal peak above the goal trough.'));
+      put(output, h('p', { class: 'alert stop' }, 'Enter a positive infusion time under 12 hours and a goal peak above the goal trough.'));
       return;
     }
     const k = patientKinetics(p, amino.drug);
@@ -242,7 +243,7 @@ export function renderAmino(h, mount) {
     const e = extendedDose(k, amino.drug);
     const drugName = DRUGS[amino.drug].name;
 
-    output.replaceChildren(
+    put(output, 
       h('div', { class: 'stats' },
         stat(h, `Dosing weight (${k.weight.basis})`, round(k.weight.kg, 1), 'kg'),
         stat(h, 'CrCl', round(k.crcl, 0), 'mL/min'),

@@ -1,3 +1,4 @@
+import { put } from './dom.js';
 import { ADULT_DOSES, PEDS_DOSES, ALGORITHMS } from './data/resus.js';
 import { REFERENCES } from './data/references.js';
 import { evaluateLine, fillDoses, parseWeight } from './calc/resus.js';
@@ -21,7 +22,7 @@ export function renderResus(h, kind, mount) {
   const weight = () => parseWeight(s.weight, kind);
 
   function drawPicker() {
-    picker.replaceChildren(...algos.map((a) => h('button', {
+    put(picker, ...algos.map((a) => h('button', {
       type: 'button', 'aria-pressed': String(a.id === s.algo),
       onclick: () => { s.algo = a.id; s.path = [a.start]; drawPicker(); drawTrail(); },
     }, a.name)));
@@ -51,7 +52,7 @@ export function renderResus(h, kind, mount) {
         }, b.label))),
         !last && h('p', { class: 'chose' }, algo.steps[id].branches.find((b) => b.to === s.path[index + 1])?.label ?? ''));
     });
-    trail.replaceChildren(
+    put(trail, 
       h('ol', { class: 'trail' }, steps),
       h('div', { class: 'trail-actions' },
         s.path.length > 1 && h('button', { type: 'button', onclick: () => { s.path.pop(); drawTrail(); } }, 'Go back one step'),
@@ -64,7 +65,7 @@ export function renderResus(h, kind, mount) {
     const { kg } = weight();
     const groups = new Map();
     doses.forEach((d) => { if (!groups.has(d.group)) groups.set(d.group, []); groups.get(d.group).push(d); });
-    list.replaceChildren(...[...groups].map(([title, items]) => h('section', { class: 'group' },
+    put(list, ...[...groups].map(([title, items]) => h('section', { class: 'group' },
       h('h2', {}, title),
       h('ul', { class: 'results' }, items.map((d) => h('li', { class: 'dose' },
         h('p', { class: 'dose-name' }, d.name, h('span', { class: 'route' }, d.route)),
@@ -100,7 +101,7 @@ export function renderResus(h, kind, mount) {
     oninput: (e) => { s.weight = e.target.value; update(); },
   });
 
-  mount.replaceChildren(
+  put(mount, 
     h('div', { class: 'code-head' },
       h('h1', {}, kind === 'acls' ? 'ACLS' : 'PALS'),
       h('div', { class: 'field kg' },

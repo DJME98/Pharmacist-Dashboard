@@ -132,6 +132,34 @@ export const RATIO_TABLES = [
     refs: ['kirchheiner2009', 'grahamTansel2018'], review: UNREVIEWED,
   },
   {
+    id: 'antipsychotic', name: 'Antipsychotics', unit: 'mg/day',
+    intro: 'Oral daily doses treated as equivalent. Each method gives different results, so compare more than one.',
+    caution: 'Equivalent doses are often inaccurate. They do not account for acuity, medical conditions, or prior exposure, and were developed for schizophrenia. They do not predict individual response.',
+    methods: [{ id: 'ddd', label: 'WHO defined daily dose' }, { id: 'med', label: 'Minimum effective dose' }, { id: 'ed95', label: 'ED95 (near-maximal effect)' }, { id: 'icsad', label: 'ICSAD-2 expert consensus' }],
+    drugs: [
+      { id: 'olanzapine', name: 'Olanzapine', equivs: { ddd: 10, med: 10, ed95: 10, icsad: 10 } },
+      { id: 'aripiprazole', name: 'Aripiprazole', equivs: { ddd: 15, med: 13.3, ed95: 6.5, icsad: 15 } },
+      { id: 'asenapine', name: 'Asenapine', equivs: { ddd: 20, med: 13.3, ed95: 6.8, icsad: 10 } },
+      { id: 'brexpiprazole', name: 'Brexpiprazole', equivs: { ddd: 3, ed95: 2.2, icsad: 2 } },
+      { id: 'cariprazine', name: 'Cariprazine', equivs: { ddd: 3, ed95: 3.9, icsad: 3 } },
+      { id: 'chlorpromazine', name: 'Chlorpromazine', equivs: { ddd: 300 } },
+      { id: 'clozapine', name: 'Clozapine', equivs: { ddd: 300, med: 400, ed95: 361.3 } },
+      { id: 'fluphenazine', name: 'Fluphenazine', equivs: { ddd: 10 } },
+      { id: 'haloperidol', name: 'Haloperidol', equivs: { ddd: 8, med: 5.3, ed95: 7.9, icsad: 5 } },
+      { id: 'iloperidone', name: 'Iloperidone', equivs: { ddd: 18, med: 10.7, ed95: 14.6 } },
+      { id: 'loxapine', name: 'Loxapine', equivs: { ddd: 100 } },
+      { id: 'lumateperone', name: 'Lumateperone', equivs: { ed95: 22.2, icsad: 21 } },
+      { id: 'lurasidone', name: 'Lurasidone', equivs: { ddd: 60, med: 53.3, ed95: 132.2, icsad: 60 } },
+      { id: 'paliperidone', name: 'Paliperidone', equivs: { ddd: 6, med: 4, ed95: 8.1, icsad: 6 } },
+      { id: 'perphenazine', name: 'Perphenazine', equivs: { ddd: 30 } },
+      { id: 'quetiapine', name: 'Quetiapine', equivs: { ddd: 400, med: 200, ed95: 650.6, icsad: 375 } },
+      { id: 'risperidone', name: 'Risperidone', equivs: { ddd: 5, med: 2.7, ed95: 2.5, icsad: 3 } },
+      { id: 'thiothixene', name: 'Thiothixene', equivs: { ddd: 30 } },
+      { id: 'ziprasidone', name: 'Ziprasidone', equivs: { ddd: 80, med: 53.3, ed95: 189.9, icsad: 80 } },
+    ],
+    refs: ['aappAntipsychotic'], review: UNREVIEWED,
+  },
+  {
     id: 'loop', name: 'Loop diuretics', unit: 'mg',
     intro: 'Approximate equivalent doses.',
     caution: 'Oral furosemide absorption varies widely (10% to 100%). Torsemide equivalence differs between references.',
@@ -166,4 +194,47 @@ export const STATIN_ITEM = {
   id: 'statin', name: 'Statin intensity', refs: ['grundy2018', 'msdStatin', 'ccjmStatin'], review: UNREVIEWED,
 };
 
-export const CONVERSION_ITEMS = [OPIOID_ITEM, ...RATIO_TABLES, STATIN_ITEM];
+export const BASAL_RULES = [
+  { id: 'nph1-glar', label: 'NPH once daily to glargine U-100', pct: [100, 100], note: 'FP Notebook suggests also considering 80%.' },
+  { id: 'nph2-glar', label: 'NPH twice daily to glargine U-100', pct: [80, 80] },
+  { id: 'u300-u100', label: 'Glargine U-300 to glargine U-100', pct: [80, 80], note: 'Used to reduce hypoglycemia risk.' },
+  { id: 'once-u300', label: 'Once-daily basal to glargine U-300', pct: [100, 110], note: 'The label starts at the same dose and expects a higher need. FP Notebook lists 110% from once-daily Lantus.' },
+  { id: 'twice-u300', label: 'Twice-daily NPH or detemir to glargine U-300', pct: [80, 80], note: 'Adjust no more often than every 3 to 4 days.' },
+  { id: 'det-u100', label: 'Detemir to U-100 long-acting', pct: [80, 100], note: 'Same total daily dose, or 20% lower if hypoglycemia risk is high.' },
+  { id: 'deg-inpt', label: 'Degludec to first-generation basal on admission, day 1', pct: [50, 50], note: 'Next day: 75% to 100% of the pre-admission dose, based on glucose. Check the timing of the last degludec dose.' },
+];
+
+export const INSULIN_ITEM = { id: 'insulin', name: 'Basal insulin conversion', refs: ['drugsGlargine', 'fpnInsulin', 'springerInsulin'], review: UNREVIEWED };
+
+export const IVPO = [
+  { drug: 'Azithromycin', iv: '250 to 500 mg q24h', po: 'Same dose' },
+  { drug: 'Ciprofloxacin', iv: '200 mg q12h', po: '250 mg BID' },
+  { drug: 'Ciprofloxacin', iv: '400 mg q12h', po: '500 mg BID' },
+  { drug: 'Ciprofloxacin', iv: '400 mg q8h, severe or Pseudomonas', po: '750 mg q12h', note: 'Northwestern' },
+  { drug: 'Clindamycin', iv: '300 mg q8h', po: '300 mg q8h' },
+  { drug: 'Clindamycin', iv: '600 mg q8h', po: '450 mg q8h' },
+  { drug: 'Clindamycin', iv: '900 mg q8h', po: '450 mg q8h', note: 'Up to 600 mg PO q8h for severe MRSA' },
+  { drug: 'Doxycycline', iv: '100 mg q12h', po: 'Same dose' },
+  { drug: 'Fluconazole', iv: '100 to 400 mg q24h', po: 'Same dose' },
+  { drug: 'Isavuconazole', iv: 'Any', po: 'Same dose' },
+  { drug: 'Levofloxacin', iv: '500 to 750 mg q24h', po: 'Same dose' },
+  { drug: 'Linezolid', iv: '600 mg q12h', po: 'Same dose' },
+  { drug: 'Metronidazole', iv: '500 mg q6 to 8h', po: '500 mg TID to QID', note: 'Non-C. difficile' },
+  { drug: 'Posaconazole', iv: '300 mg q24h', po: '300 mg q24h, DR tablet only' },
+  { drug: 'Rifampin', iv: 'Any', po: 'Same dose' },
+  { drug: 'TMP/SMX', iv: '2.5 to 5 mg/kg q12h', po: 'Same dose, max 320 mg per dose (2 DS tablets)' },
+  { drug: 'TMP/SMX, PJP treatment', iv: '5 mg/kg q8h', po: 'Same dose, max 320 mg per dose' },
+  { drug: 'Voriconazole', iv: '4 mg/kg q12h', po: 'Same dose' },
+];
+
+export const IVPO_EXCLUSIONS = [
+  'NPO, ileus, malabsorption, persistent vomiting, or more than 5 liquid stools a day',
+  'Feeding tube problems: suction, gravity drainage, not at full-rate feeds, or jejunal feeds',
+  'Dysphagia or mucositis that prevents oral medications',
+  'First 1 to 2 days of antibiotics, ICU care, or hemodynamic instability',
+  'Bacteremia, CNS infection, endocarditis, necrotizing fasciitis, osteomyelitis, sepsis, neutropenia, or an ID recommendation for IV only',
+];
+
+export const IVPO_ITEM = { id: 'ivpo', name: 'IV to PO conversion', refs: ['sbIvpo', 'nmIvpo'], review: UNREVIEWED };
+
+export const CONVERSION_ITEMS = [OPIOID_ITEM, ...RATIO_TABLES, STATIN_ITEM, INSULIN_ITEM, IVPO_ITEM];

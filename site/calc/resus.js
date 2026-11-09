@@ -1,6 +1,6 @@
 // Pure helpers for resuscitation doses. Data lives in data/resus.js.
 
-export const WEIGHT_LIMITS = { acls: [20, 400], pals: [0.3, 200] };
+export const WEIGHT_LIMITS = { acls: [20, 400], pals: [0.3, 200], care: [0.3, 400] };
 
 export function parseWeight(text, kind) {
   const t = String(text ?? '').trim();
