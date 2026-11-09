@@ -3,6 +3,8 @@ import { CALCULATIONS, evaluate } from './calc/registry.js';
 import { REFERENCES, REFERENCES_ACCESSED, CHECK_LABELS } from './data/references.js';
 import { RESUS_ITEMS } from './data/resus.js';
 import { renderResus } from './resus-view.js';
+import { PK_ITEMS } from './data/pk.js';
+import { renderVanco, renderAmino } from './pk-view.js';
 
 // Patient values live only in this variable. They are never stored or sent.
 const raw = emptyRaw();
@@ -169,6 +171,7 @@ function results(page, p) {
 let resultsEl;
 let alertsEl;
 let currentPage = 'renal';
+let pkUpdate = null;
 
 function update() {
   const { p, errors, warnings } = normalize(raw);
@@ -185,6 +188,7 @@ function update() {
     alertsEl.replaceChildren(...warnings.map((w) => h('p', { class: 'alert' }, w)));
   }
   if (resultsEl) resultsEl.replaceChildren(...[results(currentPage, p)].flat(2).filter(Boolean));
+  if (pkUpdate) pkUpdate(p);
 }
 
 function referencesPage() {
@@ -195,7 +199,7 @@ function referencesPage() {
       list.querySelectorAll('li').forEach((li) => { li.hidden = q !== '' && !li.textContent.toLowerCase().includes(q); });
     },
   });
-  const usedBy = (id) => [...CALCULATIONS, ...RESUS_ITEMS].filter((c) => c.refs.includes(id)).map((c) => (c.kind === 'acls' || c.kind === 'pals' ? `${c.kind.toUpperCase()} ${c.name.toLowerCase()} algorithm` : c.name));
+  const usedBy = (id) => [...CALCULATIONS, ...RESUS_ITEMS, ...PK_ITEMS].filter((c) => c.refs.includes(id)).map((c) => (c.kind === 'acls' || c.kind === 'pals' ? `${c.kind.toUpperCase()} ${c.name.toLowerCase()} algorithm` : c.name));
   const entries = Object.entries(REFERENCES).sort((a, b) => a[1].cite.localeCompare(b[1].cite));
   const list = h('ul', { class: 'ref-list' }, entries.map(([id, r]) => h('li', {},
     h('p', { class: 'ref-cite' }, r.url ? h('a', { href: r.url, target: '_blank', rel: 'noopener' }, r.cite) : r.cite),
@@ -209,7 +213,8 @@ function referencesPage() {
 
 function route() {
   const page = (location.hash || '#renal').slice(1);
-  currentPage = ['renal', 'body', 'acls', 'pals', 'refs'].includes(page) ? page : 'renal';
+  currentPage = ['renal', 'body', 'acls', 'pals', 'vanco', 'amino', 'refs'].includes(page) ? page : 'renal';
+  pkUpdate = null;
   document.querySelectorAll('[data-nav]').forEach((a) => {
     if (a.dataset.nav === currentPage) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
@@ -219,6 +224,19 @@ function route() {
     alertsEl = null;
     app.className = 'layout code';
     renderResus(h, currentPage, app);
+    return;
+  }
+  if (currentPage === 'vanco' || currentPage === 'amino') {
+    resultsEl = null;
+    app.className = 'layout';
+    alertsEl = h('div', { class: 'alerts', role: 'status' });
+    const body = h('div', {});
+    app.replaceChildren(patientPanel(),
+      h('div', { class: 'readout' },
+        h('h1', {}, currentPage === 'vanco' ? 'Vancomycin' : 'Aminoglycosides'),
+        alertsEl, body));
+    pkUpdate = (currentPage === 'vanco' ? renderVanco : renderAmino)(h, body);
+    update();
     return;
   }
   if (currentPage === 'refs') {

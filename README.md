@@ -17,6 +17,11 @@ Dosing calculators and clinical references for pharmacists. It installs to a pho
 - PALS doses and shocks calculated from weight, with caps; ACLS doses flat except weight-based drugs
 - Sources and review status on every dose and algorithm
 
+## What is in stage 3
+
+- Vancomycin AUC: single-level Bayesian estimate using the Goti 2018 model, or a population estimate with no level
+- Aminoglycosides: traditional and extended-interval dosing
+
 ## Publishing
 
 In the repository, open Settings, then Pages, and set Source to GitHub Actions. Each push to `main` then runs the tests and publishes `site/`.
