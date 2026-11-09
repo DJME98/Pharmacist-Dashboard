@@ -65,11 +65,10 @@ def u25_cys_k(age, sex):
     return 87.2 * 0.96 ** (age - 15) if age < 18 else 77.1
 
 
-def jelliffe(age, ibw, earlier, latest, days, sex):
-    avg = (earlier + latest) / 2
-    ess = ibw * (25.1 - 0.175 * age) if sex == "F" else ibw * (29.3 - 0.203 * age)
-    e = ess * (1.035 - 0.0337 * avg) - 4 * ibw * (latest - earlier) / days
-    return e / (14.4 * avg)
+def jelliffe(age, weight, earlier, latest, days, sex):
+    production = weight * (25.3 - 0.175 * age) if sex == "F" else weight * (29.3 - 0.203 * age)
+    used = latest if latest > earlier else (earlier + latest) / 2
+    return (production - 0.6 * weight * 10 * (latest - earlier) / days) * 100 / (used * 1440)
 
 
 def salazar(age, kg, cm, scr, sex):

@@ -54,7 +54,13 @@ test('EKFC at Q', () => {
 });
 
 test('Jelliffe with stable creatinine', () => {
-  close(f.jelliffe(40, 70, 1, 1, 1, 'M'), 103.09, 0.02);
+  close(f.jelliffe(40, 70, 1, 1, 1, 'M'), 102.96);
+  close(f.jelliffe(40, 70, 1, 1, 1, 'F'), 88.96);
+});
+
+test('Jelliffe with rising and falling creatinine', () => {
+  close(f.jelliffe(40, 70, 1, 2, 1, 'M'), 36.9);
+  close(f.jelliffe(40, 70, 3, 2, 1, 'M'), 52.85);
 });
 
 test('Jelliffe is lower when creatinine rises', () => {

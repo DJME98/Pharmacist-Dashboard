@@ -40,13 +40,13 @@ export function salazarCorcoran(age, kg, cm, scr, sex) {
     : ((137 - age) * (0.285 * kg + 12.1 * m ** 2)) / (51 * scr);
 }
 
-// Jelliffe 2002, result in mL/min/1.73 m2. Weight is ideal body weight.
-export function jelliffe(age, ibw, scrEarlier, scrLatest, days, sex) {
-  const scrAvg = (scrEarlier + scrLatest) / 2;
-  const ess = isFemale(sex) ? ibw * (25.1 - 0.175 * age) : ibw * (29.3 - 0.203 * age);
-  const corrected = ess * (1.035 - 0.0337 * scrAvg);
-  const e = corrected - (4 * ibw * (scrLatest - scrEarlier)) / days;
-  return e / (14.4 * scrAvg);
+// Jelliffe, ClinCalc variant: V = 0.6 L/kg. Result in mL/min.
+// Weight is the lesser of ideal and actual body weight (chosen by the caller).
+export function jelliffe(age, weight, scrEarlier, scrLatest, days, sex) {
+  const production = isFemale(sex) ? weight * (25.3 - 0.175 * age) : weight * (29.3 - 0.203 * age);
+  const volumeL = 0.6 * weight;
+  const scrUsed = scrLatest > scrEarlier ? scrLatest : (scrEarlier + scrLatest) / 2;
+  return ((production - (volumeL * 10 * (scrLatest - scrEarlier)) / days) * 100) / (scrUsed * 1440);
 }
 
 // CKD-EPI, adults

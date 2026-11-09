@@ -72,18 +72,22 @@ export const CALCULATIONS = [
     page: 'renal',
     group: 'Creatinine clearance',
     name: 'Jelliffe, changing creatinine',
-    unit: INDEXED,
-    kind: 'egfr',
+    unit: MLMIN,
+    kind: 'crcl',
     decimals: 0,
-    needs: ['ageY', 'sex', 'scr', 'prevScr', 'days', 'heightCm'],
+    needs: ['ageY', 'sex', 'scr', 'prevScr', 'days', 'heightCm', 'weightKg'],
     applies: (p) => adult(p),
-    compute: (p) => ({
-      value: f.jelliffe(p.ageY, ibwOf(p), p.prevScr, p.scr, p.days, p.sex),
-      used: `Ideal weight ${ibwOf(p).toFixed(1)} kg, average SCr ${((p.prevScr + p.scr) / 2).toFixed(2)} mg/dL`,
-    }),
-    formula: (p) => `Ess = IBW × ${p.sex === 'F' ? '(25.1 − 0.175 × age)' : '(29.3 − 0.203 × age)'}; Ecorr = Ess × (1.035 − 0.0337 × SCr avg); E = Ecorr − 4 × IBW × (SCr latest − SCr earlier) ÷ days; CrCl = E ÷ (14.4 × SCr avg)`,
-    note: 'Secondary sources print different coefficients and weights for this method; RxKinetics and ClinCalc each differ from the version used here. Less accurate while renal function is improving.',
-    refs: ['jelliffe2002', 'jelliffe1972', 'gfrAkiModelling', 'rxkRenal', 'clincalcCrcl'],
+    compute: (p) => {
+      const w = Math.min(ibwOf(p), p.weightKg);
+      const scrUsed = p.scr > p.prevScr ? p.scr : (p.prevScr + p.scr) / 2;
+      return {
+        value: f.jelliffe(p.ageY, w, p.prevScr, p.scr, p.days, p.sex),
+        used: `Weight used: ${w.toFixed(1)} kg. SCr used in the denominator: ${scrUsed.toFixed(2)} mg/dL`,
+      };
+    },
+    formula: (p) => `Production = weight × ${p.sex === 'F' ? '(25.3 − 0.175 × age)' : '(29.3 − 0.203 × age)'}; V = 0.6 L/kg × weight; CrCl = (Production − V × 10 × (SCr latest − SCr earlier) ÷ days) × 100 ÷ (SCr used × 1440)`,
+    note: 'Follows the ClinCalc variant: V of 0.6 L/kg, the lesser of ideal and actual weight, latest SCr if rising, and average SCr if falling. Other published versions use different coefficients. Less accurate while renal function is improving.',
+    refs: ['clincalcCrcl', 'jelliffe2002', 'jelliffe1972', 'rxkRenal', 'gfrAkiModelling'],
     review: UNREVIEWED,
   },
   {
