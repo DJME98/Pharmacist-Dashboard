@@ -383,9 +383,15 @@ export function renderConvert(h, mount) {
       const rule = BASAL_RULES.find((r) => r.id === state.insulinRule);
       if (dose === null) { put(out, h('p', { class: 'empty' }, 'Enter the current total daily basal dose.')); return; }
       if (Number.isNaN(dose)) { put(out, h('p', { class: 'alert stop' }, 'Enter a positive number.')); return; }
+      const total = practical(rule.pct.map((p) => (dose * p) / 100), 1);
+      const split = rule.alwaysSplit || (rule.splitAbove && dose > rule.splitAbove);
+      const each = split && practical(total.map((t) => t / 2), 1);
       put(out, 
         h('div', { class: 'pk-hero' }, h('p', { class: 'hero-label' }, 'Starting total daily dose'),
-          h('p', { class: 'hero-value' }, formatRange(practical(rule.pct.map((p) => (dose * p) / 100), 1), 'units'))),
+          h('p', { class: 'hero-value' }, formatRange(total, 'units'))),
+        split && h('p', { class: 'basis-line' }, rule.alwaysSplit
+          ? `Split by meals: with two meals, ${formatRange(each, 'units')} with each.`
+          : `Dose over ${rule.splitAbove} units: give ${formatRange(each, 'units')} every 12 h.`),
         rule.note && h('p', { class: 'hint' }, rule.note));
     };
     put(body, 

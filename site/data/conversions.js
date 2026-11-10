@@ -281,16 +281,19 @@ export const STATIN_ITEM = {
 };
 
 export const BASAL_RULES = [
-  { id: 'nph1-glar', label: 'NPH once daily to glargine U-100', pct: [100, 100], note: 'FP Notebook suggests also considering 80%.' },
-  { id: 'nph2-glar', label: 'NPH twice daily to glargine U-100', pct: [80, 80] },
-  { id: 'u300-u100', label: 'Glargine U-300 to glargine U-100', pct: [80, 80], note: 'Used to reduce hypoglycemia risk.' },
-  { id: 'once-u300', label: 'Once-daily basal to glargine U-300', pct: [100, 110], note: 'The label starts at the same dose and expects a higher need. FP Notebook lists 110% from once-daily Lantus.' },
-  { id: 'twice-u300', label: 'Twice-daily NPH or detemir to glargine U-300', pct: [80, 80], note: 'Adjust no more often than every 3 to 4 days.' },
+  { id: 'basal-basal', label: 'Long-acting analog to another (glargine U-100, detemir)', pct: [80, 80], src: 'ADA', note: 'ADA-approved switching guide: reduce by 20%.' },
+  { id: 'deg-basal', label: 'Degludec (Tresiba) to glargine U-100 or detemir', pct: [80, 80], splitAbove: 80, src: 'ADA', note: 'ADA-approved switching guide: reduce by 20%. If the degludec dose is over 80 units, split the new insulin into two equal doses 12 h apart.' },
+  { id: 'u300-u100', label: 'Glargine U-300 (Toujeo) to glargine U-100 (Lantus)', pct: [80, 80], splitAbove: 80, src: 'ADA', note: 'Reduce by 20% (ADA-approved switching guide). For doses over 80 units, split into two equal doses 12 h apart (Cardi-OH 2025). The ADA guide states the split rule for degludec; it applies the same 20% reduction to Toujeo.' },
+  { id: 'nph1-basal', label: 'NPH once daily to a long-acting analog', pct: [80, 80], src: 'ADA', note: 'ADA-approved guide: reduce by 20%. The glargine label allows the same dose when coming from once-daily NPH.' },
+  { id: 'nph2-basal', label: 'NPH twice daily to a long-acting analog once daily', pct: [80, 80], src: 'ADA', note: 'Add up the daily NPH and give 80% once daily. The ADA-approved guide and the glargine label agree.' },
+  { id: 'basal-nph', label: 'Long-acting analog to NPH', pct: [80, 80], alwaysSplit: true, src: 'ADA', note: 'ADA-approved guide: reduce by 20% and divide by meals; with two meals, give half with each.' },
+  { id: 'once-u300', label: 'Once-daily basal to glargine U-300 (Toujeo)', pct: [100, 110], note: 'The label starts at the same dose and expects a higher need. FP Notebook lists 110% from once-daily Lantus. The ADA disaster guide uses an 80% start for any basal switch.' },
+  { id: 'twice-u300', label: 'Twice-daily NPH or detemir to glargine U-300', pct: [80, 80], note: 'Label. Adjust no more often than every 3 to 4 days.' },
   { id: 'det-u100', label: 'Detemir to U-100 long-acting', pct: [80, 100], note: 'Same total daily dose, or 20% lower if hypoglycemia risk is high.' },
   { id: 'deg-inpt', label: 'Degludec to first-generation basal on admission, day 1', pct: [50, 50], note: 'Next day: 75% to 100% of the pre-admission dose, based on glucose. Check the timing of the last degludec dose.' },
 ];
 
-export const INSULIN_ITEM = { id: 'insulin', name: 'Basal insulin conversion', refs: ['drugsGlargine', 'fpnInsulin', 'springerInsulin'], review: UNREVIEWED };
+export const INSULIN_ITEM = { id: 'insulin', name: 'Basal insulin conversion', refs: ['ddrc2022', 'ddrc2018', 'cardiohInsulin', 'drugsGlargine', 'fpnInsulin', 'springerInsulin'], review: UNREVIEWED };
 
 export const IVPO = [
   { drug: 'Azithromycin', iv: '250 to 500 mg q24h', po: 'Same dose' },

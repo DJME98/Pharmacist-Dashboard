@@ -145,8 +145,12 @@ test('antipsychotic methods', () => {
 
 test('insulin rules', () => {
   const rule = (id) => BASAL_RULES.find((r) => r.id === id);
-  assert.deepEqual(rule('nph2-glar').pct, [80, 80]);
+  assert.deepEqual(rule('nph2-basal').pct, [80, 80]);
   assert.deepEqual(rule('u300-u100').pct, [80, 80]);
+  assert.equal(rule('u300-u100').splitAbove, 80);
+  assert.equal(rule('deg-basal').splitAbove, 80);
+  assert.ok(rule('basal-nph').alwaysSplit);
+  for (const r of BASAL_RULES) assert.ok(r.label && r.pct.length === 2, r.id);
   assert.deepEqual(rule('once-u300').pct, [100, 110]);
 });
 
