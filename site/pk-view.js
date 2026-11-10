@@ -4,8 +4,8 @@ import {
   MODEL, TARGET, buildHistory, concentrationAt, crclForModel, fitOneLevel, individualParams,
   loadingRange, populationWarnings, regimenOptions, steadyState, typicalParams, DOSE_RULE, isAllowedDose,
 } from './calc/vanco.js';
-import { patientKinetics } from './calc/amino.js';
-import { PK_ITEMS, NOMOGRAMS, NOMOGRAM_RULES, NOMOGRAM_EXCLUSIONS, NOMOGRAM_DOSES } from './data/pk.js';
+import { patientKinetics, hartfordInterval, hartfordLine, hartfordZone, HARTFORD_RANGE } from './calc/amino.js';
+import { PK_ITEMS } from './data/pk.js';
 import { REFERENCES } from './data/references.js';
 
 // Dose history is held only in these objects and is never stored or sent.
@@ -206,55 +206,113 @@ export function renderVanco(h, mount) {
   return (p) => { patient = p; draw(); };
 }
 
+const ZONE_TEXT = {
+  q24: 'q24h: give 7 mg/kg every 24 h.',
+  q36: 'q36h: give 7 mg/kg every 36 h.',
+  q48: 'q48h: give 7 mg/kg every 48 h.',
+  above: 'Above the q48h zone: stop once-daily dosing and dose by serial levels.',
+  below: 'Below the nomogram (under 2 mcg/mL): q24h, and reassess the dose if the patient is not improving.',
+  outside: 'The nomogram only covers levels drawn 6 to 14 h after the start of the infusion.',
+};
+
+function hartfordChart(h, point) {
+  const W = 640; const H = 440;
+  const pad = { l: 56, r: 18, t: 16, b: 52 };
+  const [t0, t1] = HARTFORD_RANGE.t; const [c0, c1] = HARTFORD_RANGE.c;
+  const x = (t) => pad.l + ((t - t0) / (t1 - t0)) * (W - pad.l - pad.r);
+  const y = (c) => H - pad.b - ((c - c0) / (c1 - c0)) * (H - pad.t - pad.b);
+  const ns = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs, ...kids) => {
+    const n = document.createElementNS(ns, tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+    kids.forEach((k) => n.append(k));
+    return n;
+  };
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, class: 'nomo-chart', role: 'img', 'aria-label': 'Hartford nomogram: concentration against hours after the start of the infusion, with q24h, q36h, and q48h zones' });
+  const clipId = 'nomo-clip';
+  svg.append(el('defs', {}, el('clipPath', { id: clipId }, el('rect', { x: x(t0), y: y(c1), width: x(t1) - x(t0), height: y(c0) - y(c1) }))));
+  const poly = (lo, hi) => {
+    const pts = [];
+    for (const t of [6, 14]) pts.push(`${x(t)},${y(lo ? hartfordLine(lo, t) : c0)}`);
+    for (const t of [14, 6]) pts.push(`${x(t)},${y(hi ? hartfordLine(hi, t) : c1)}`);
+    return el('polygon', { points: pts.join(' '), class: `zone zone-${hi ?? 'top'}`, 'clip-path': `url(#${clipId})` });
+  };
+  svg.append(poly(null, 'q24q36'), poly('q24q36', 'q36q48'), poly('q36q48', 'q48top'), poly('q48top', null));
+  for (let c = c0; c <= c1; c += 1) {
+    svg.append(el('line', { x1: x(t0), x2: x(t1), y1: y(c), y2: y(c), class: 'grid' }));
+    svg.append(el('text', { x: x(t0) - 8, y: y(c) + 4, 'text-anchor': 'end', class: 'tick' }, String(c)));
+  }
+  for (let t = t0; t <= t1; t += 1) {
+    svg.append(el('line', { x1: x(t), x2: x(t), y1: y(c0), y2: y(c1), class: 'grid' }));
+    svg.append(el('text', { x: x(t), y: y(c0) + 20, 'text-anchor': 'middle', class: 'tick' }, String(t)));
+  }
+  ['q24q36', 'q36q48', 'q48top'].forEach((ln) => svg.append(el('line', { x1: x(6), y1: y(hartfordLine(ln, 6)), x2: x(14), y2: y(hartfordLine(ln, 14)), class: 'nomo-line', 'clip-path': `url(#${clipId})` })));
+  svg.append(el('line', { x1: x(14), x2: x(14), y1: y(c0), y2: y(hartfordLine('q48top', 14)), class: 'nomo-line' }));
+  svg.append(el('line', { x1: x(t0), x2: x(t1), y1: y(c0), y2: y(c0), class: 'axis' }));
+  svg.append(el('line', { x1: x(t0), x2: x(t0), y1: y(c0), y2: y(c1), class: 'axis' }));
+  const label = (t, c, s) => svg.append(el('text', { x: x(t), y: y(c), 'text-anchor': 'middle', class: 'zone-label' }, s));
+  // Labels sit midway between the lines that bound each zone.
+  const mid = (t, lo, hi) => ((lo ? hartfordLine(lo, t) : c0) + (hi ? hartfordLine(hi, t) : c1)) / 2 - 0.2;
+  label(7.3, mid(7.3, null, 'q24q36'), 'Q24h'); label(8.2, mid(8.2, 'q24q36', 'q36q48'), 'Q36h');
+  label(8.8, mid(8.8, 'q36q48', 'q48top'), 'Q48h'); label(11.4, mid(11.4, 'q48top', null), 'Stop once-daily dosing');
+  svg.append(el('text', { x: (x(t0) + x(t1)) / 2, y: H - 8, 'text-anchor': 'middle', class: 'tick' }, 'Hours from start of infusion to sample draw'));
+  svg.append(el('text', { x: 14, y: (y(c0) + y(c1)) / 2, 'text-anchor': 'middle', class: 'tick', transform: `rotate(-90 14 ${(y(c0) + y(c1)) / 2})` }, 'Concentration (mcg/mL)'));
+  if (point) {
+    const pt = Math.min(Math.max(point.t, t0), t1); const pc = Math.min(Math.max(point.c, c0), c1);
+    svg.append(el('circle', { cx: x(pt), cy: y(pc), r: 7, class: 'nomo-point' }));
+  }
+  return svg;
+}
+
+const hartford = { t: '', level: '' };
+
 export function renderAmino(h, mount) {
   const side = h('div', { class: 'nomo-side' });
   const main = h('div', {});
-  put(mount, side, main);
+  const result = h('div', { 'aria-live': 'polite' });
+  const chartWrap = h('div', { class: 'scroll' });
   let patient = null;
 
-  function drawSide(k) {
-    if (!k) {
-      put(side, h('p', { class: 'empty' }, 'Enter age, sex, height, weight, and SCr to see CrCl, dosing weight, and doses in mg.'));
-      return;
-    }
+  const redrawChart = () => {
+    const t = num(hartford.t); const c = num(hartford.level);
+    const ok = t !== null && c !== null && Number.isFinite(t) && Number.isFinite(c) && c > 0;
+    put(chartWrap, hartfordChart(h, ok ? { t, c } : null));
+    if (!ok) { put(result, (t !== null || c !== null) && !(Number.isFinite(t) && Number.isFinite(c)) ? h('p', { class: 'alert stop' }, 'Enter numbers for both the time and the level.') : h('p', { class: 'empty' }, 'Enter the time and level to plot the point.')); return; }
+    const z = hartfordZone(t, c);
+    put(result, h('p', { class: `basis-line zone-result zr-${z}` }, ZONE_TEXT[z]),
+      h('p', { class: 'hint' }, `At ${round(t, 1)} h the lines sit at ${round(hartfordLine('q24q36', Math.min(Math.max(t, 6), 14)), 1)}, ${round(hartfordLine('q36q48', Math.min(Math.max(t, 6), 14)), 1)}, and ${round(hartfordLine('q48top', Math.min(Math.max(t, 6), 14)), 1)} mcg/mL. A level on a line takes the longer interval.`));
+  };
+
+  put(mount, side, main);
+  put(main,
+    h('section', { class: 'group' },
+      h('h2', {}, 'Hartford nomogram: gentamicin or tobramycin 7 mg/kg'),
+      h('p', {}, 'Give 7 mg/kg with the interval chosen from CrCl, draw one random level 6 to 14 h after the start of the infusion, and plot it.'),
+      h('div', { class: 'pk-grid' },
+        textField(h, hartford, 't', 'Hours from start of infusion to draw', redrawChart),
+        textField(h, hartford, 'level', 'Level (mcg/mL)', redrawChart)),
+      result,
+      chartWrap,
+      h('p', { class: 'hint' }, 'Redrawn from Nicolau et al. 1995, Figure 1. The three straight lines were traced from the published figure. For patients on therapy 5 days or more, the authors checked a random level on day 5 and weekly after that.'),
+      h('p', { class: 'alert' }, 'The authors excluded ascites, burns over 20% of body surface area, pregnancy, end-stage kidney disease or dialysis, and enterococcal endocarditis. The nomogram is for 7 mg/kg gentamicin or tobramycin only.'),
+      ...item(h, 'ag-extended')));
+  redrawChart();
+
+  function drawSide() {
+    const p = patient;
+    const ready = p && p.ageY !== null && p.ageY >= 18 && p.sex !== null && p.heightCm !== null && p.weightKg !== null && p.scr !== null;
+    if (!ready) { put(side, h('p', { class: 'empty' }, 'Enter age, sex, height, weight, and SCr to see CrCl, the starting interval, and the 7 mg/kg dose.')); return; }
+    const k = patientKinetics(p, 'gent');
+    const tau = hartfordInterval(k.crcl);
+    const mg = Math.round((7 * k.weight.kg) / 10) * 10;
     put(side,
       h('div', { class: 'stats' },
         stat(h, 'CrCl (Cockcroft-Gault)', round(k.crcl, 0), 'mL/min'),
-        stat(h, `Dosing weight (${k.weight.basis})`, round(k.weight.kg, 1), 'kg')),
-      h('div', { class: 'scroll' }, h('table', { class: 'data' },
-        h('thead', {}, h('tr', {}, ['Drug', 'mg/kg', 'Dose'].map((t) => h('th', { scope: 'col' }, t)))),
-        h('tbody', {}, NOMOGRAM_DOSES.flatMap((d) => d.perKg.map((pk) => h('tr', {},
-          h('td', {}, d.drug), h('td', {}, `${pk}`), h('td', {}, `${round(Math.round((pk * k.weight.kg) / d.round) * d.round)} mg`))))))),
-      h('p', { class: 'hint' }, 'Dosing weight: actual if under ideal, ideal up to 120% of ideal, then adjusted (ideal + 0.4 × excess). Gentamicin and tobramycin round to 10 mg, amikacin to 50 mg. The highlighted rows below match this CrCl.'));
+        stat(h, `Dosing weight (${k.weight.basis})`, round(k.weight.kg, 1), 'kg'),
+        stat(h, '7 mg/kg dose', round(mg), 'mg'),
+        stat(h, 'Starting interval', tau ? `q${tau}h` : 'Serial levels', '')),
+      h('p', { class: 'hint' }, 'Interval by CrCl (Nicolau 1995): 60 or more q24h, 40 to 59 q36h, 20 to 39 q48h, under 20 dose and follow serial levels. Dosing weight is actual below ideal, ideal up to 120% of ideal, then ideal + 0.4 × excess (Traynor 1995). Dose rounded to 10 mg.'));
   }
 
-  function draw() {
-    const p = patient;
-    const ready = p && p.ageY !== null && p.ageY >= 18 && p.sex !== null && p.heightCm !== null && p.weightKg !== null && p.scr !== null;
-    const k = ready ? patientKinetics(p, 'gent') : null;
-    drawSide(k);
-    put(main,
-      h('p', {}, 'Extended-interval dosing by nomogram. Pick the dose, choose the interval from CrCl, draw one level, and plot it on the matching nomogram.'),
-      h('p', { class: 'alert' }, NOMOGRAM_EXCLUSIONS),
-      NOMOGRAMS.map((n) => h('section', { class: 'group nomo' },
-        h('h2', {}, n.name),
-        h('p', { class: 'basis-line' }, n.dose),
-        h('div', { class: 'scroll' }, h('table', { class: 'data' },
-          h('thead', {}, h('tr', {}, ['CrCl (mL/min)', 'Gentamicin or tobramycin', 'Amikacin'].map((t) => h('th', { scope: 'col' }, t)))),
-          h('tbody', {}, n.rows.map((r, i) => {
-            const hi = i === 0 ? Infinity : n.rows[i - 1][3];
-            const match = k && k.crcl >= r[3] && k.crcl < hi;
-            return h('tr', { class: match ? 'match' : '' }, h('td', {}, r[0]), h('td', {}, r[1]), h('td', {}, r[2]));
-          })))),
-        h('ul', { class: 'plain' }, h('li', {}, h('b', {}, 'Level: '), n.level), h('li', {}, h('b', {}, 'Plotting: '), n.plot), n.notes.map((t) => h('li', {}, t))))),
-      h('section', { class: 'group' },
-        h('h2', {}, 'Reading the nomogram'),
-        h('ul', { class: 'plain' }, NOMOGRAM_RULES.map((t) => h('li', {}, t))),
-        h('p', {}, h('a', { href: 'https://med.stanford.edu/content/dam/sm/bugsanddrugs/documents/antimicrobial-dosing-protocols/SHC-Aminoglycoside-Dosing-Guide.pdf', target: '_blank', rel: 'noopener' }, 'Open the Hartford and Urban-Craig nomogram graphs (Stanford guide, Appendix A)')),
-        h('p', { class: 'hint' }, 'The graphs are linked rather than redrawn: their exact line positions are not published in a form that could be checked.'),
-        ...item(h, 'ag-extended')),
-    );
-  }
-
-  return (pt) => { patient = pt; draw(); };
+  return (pt) => { patient = pt; drawSide(); };
 }

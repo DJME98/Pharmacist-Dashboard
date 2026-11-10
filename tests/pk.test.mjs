@@ -131,3 +131,17 @@ test('every PK tool has known sources and a review status', () => {
     assert.ok(['unverified', 'verified'].includes(item.review.status));
   }
 });
+
+test('Hartford nomogram zones follow the traced lines', () => {
+  assert.equal(a.hartfordZone(10, 3), 'q24');
+  assert.equal(a.hartfordZone(10, 6), 'q36');
+  assert.equal(a.hartfordZone(10, 8), 'q48');
+  assert.equal(a.hartfordZone(10, 10), 'above');
+  assert.equal(a.hartfordZone(13, 1.5), 'below');
+  assert.equal(a.hartfordZone(5, 4), 'outside');
+  // A level on a line takes the longer interval.
+  assert.equal(a.hartfordZone(6, 7.54), 'q36');
+  assert.equal(a.hartfordZone(14, 3.05), 'q48');
+  // Lines match the figure's end points.
+  assert.equal(Number(a.hartfordLine('q36q48', 10).toFixed(3)), 7.085);
+});

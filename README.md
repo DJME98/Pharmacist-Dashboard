@@ -20,7 +20,7 @@ For reference only. Use clinical judgment, and confirm doses against current ref
 ## What is in stage 3
 
 - Vancomycin AUC: single-level Bayesian estimate using the Goti 2018 model, or a population estimate with no level
-- Aminoglycosides: extended-interval nomograms (Hartford 7 mg/kg, Urban-Craig 5 mg/kg, amikacin, cystic fibrosis) with CrCl and doses beside them
+- Aminoglycosides: the Hartford nomogram (Nicolau 1995) redrawn from the published figure; enter a level to plot it, with CrCl and the 7 mg/kg dose beside it
 - Vancomycin doses use 250 mg steps from 500 to 2000 mg
 
 ## What is in stage 4

@@ -349,5 +349,13 @@ table.data tr.group-row th { text-align: left; font-size: .85rem; text-transform
 
 /* Aminoglycoside nomograms */
 .nomo-side { margin-bottom: 12px; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
-table.data tr.match td { background: color-mix(in srgb, var(--plum-ink) 16%, transparent); font-weight: 700; }
-table.data tr.match td:first-child { box-shadow: inset 4px 0 0 var(--plum-ink); }
+.nomo-chart { width: 100%; min-width: 0; height: auto; display: block; margin: 10px 0; }
+.nomo-chart .grid { stroke: var(--rule); stroke-width: 1; }
+.nomo-chart .axis { stroke: var(--ink); stroke-width: 1.5; }
+.nomo-chart .tick { fill: var(--muted); font-size: 13px; font-family: inherit; }
+.nomo-chart .nomo-line { stroke: var(--ink); stroke-width: 2.2; }
+.nomo-chart .zone-label { fill: var(--ink); font-size: 15px; font-weight: 700; font-family: inherit; }
+.nomo-chart .zone { opacity: .16; }
+.zone-q24q36 { fill: var(--dur-short); } .zone-q36q48 { fill: var(--dur-mid); } .zone-q48top { fill: var(--dur-long); } .zone-top { fill: var(--danger); }
+.nomo-chart .nomo-point { fill: var(--danger); stroke: var(--surface); stroke-width: 2.5; }
+.zone-result.zr-above, .zone-result.zr-outside { color: var(--danger); }
