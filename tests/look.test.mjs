@@ -77,7 +77,7 @@ test('every benzodiazepine sits in a duration group', () => {
 });
 
 test('steroid and ARB rows carry durations', () => {
-  for (const id of ['steroid', 'arb']) {
+  for (const id of ['steroid', 'arb', 'benzo', 'beta', 'ace']) {
     const t = RATIO_TABLES.find((x) => x.id === id);
     assert.ok(t.durationLabel);
     for (const d of t.drugs.filter((x) => x.dur)) assert.ok(['short', 'mid', 'long'].includes(d.durClass) && d.dur[0] <= d.dur[1], d.id);

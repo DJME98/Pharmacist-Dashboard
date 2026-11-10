@@ -109,14 +109,16 @@ export function renderConvert(h, mount) {
 
   const DUR_LABEL = { short: 'Short', mid: 'Intermediate', long: 'Long' };
 
-  function durationBar(d, maxH) {
-    if (!d.dur) return h('span', { class: 'basis' }, 'Not reported');
+  function durationBar(d, maxH, log) {
+    if (!d.dur) return h('span', { class: 'basis' }, d.durText ?? 'Not reported');
     const [lo, hi] = d.dur;
     const text = d.durText ?? (lo === hi ? `${lo} h` : `${lo} to ${hi} h`);
+    // Log scale keeps 2 h and 200 h half-lives both visible.
+    const pos = (v) => (log ? Math.log(1 + v) / Math.log(1 + maxH) : v / maxH) * 100;
     return h('div', { class: 'dur' },
       h('span', { class: `dur-track dur-${d.durClass}`, role: 'img', 'aria-label': `${DUR_LABEL[d.durClass]}: ${text}` },
-        h('span', { class: 'dur-solid', style: `width:${(lo / maxH) * 100}%` }),
-        hi > lo && h('span', { class: 'dur-range', style: `left:${(lo / maxH) * 100}%;width:${((hi - lo) / maxH) * 100}%` })),
+        h('span', { class: 'dur-solid', style: `width:${pos(lo)}%` }),
+        hi > lo && h('span', { class: 'dur-range', style: `left:${pos(lo)}%;width:${pos(hi) - pos(lo)}%` })),
       h('span', { class: 'dur-text' }, text));
   }
 
@@ -130,7 +132,7 @@ export function renderConvert(h, mount) {
     const row = (d) => h('tr', { class: d.alt ? 'conflict' : '' },
       h('td', {}, d.name),
       h('td', {}, fmt(d.equiv)),
-      durations && h('td', {}, durationBar(d, maxH)),
+      durations && h('td', {}, durationBar(d, maxH, table.durScale === 'log')),
       conflicts && h('td', {}, (d.alt ?? []).map((a) => `${SOURCES[a.src].label}: ${fmt(a.v)}${a.note ? ` (${a.note})` : ''}`).join('; ')),
       notes && h('td', {}, d.detail ?? ''));
     const bodyRows = table.groups
@@ -141,7 +143,7 @@ export function renderConvert(h, mount) {
     return h('section', { class: 'group' },
       h('h2', {}, 'Equivalence table'),
       durations && h('p', { class: 'dur-legend' }, ['short', 'mid', 'long'].map((c) => h('span', { class: `dur-key dur-${c}` }, DUR_LABEL[c])),
-        h('span', { class: 'hint' }, ' Longer bar, longer acting. The lighter part shows the range.')),
+        h('span', { class: 'hint' }, ` Longer bar, longer acting. The lighter part shows the range.${table.durScale === 'log' ? ' Log scale.' : ''}${table.durNote ? ` ${table.durNote}` : ''}`)),
       h('div', { class: 'scroll' }, h('table', { class: 'data list' },
         h('thead', {}, h('tr', {}, cols.map((t) => h('th', { scope: 'col' }, t)))),
         h('tbody', {}, bodyRows))));
