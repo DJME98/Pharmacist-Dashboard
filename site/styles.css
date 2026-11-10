@@ -276,8 +276,10 @@ mark.chip { background: none; color: var(--cat); font-weight: 700; border-bottom
 .broselow { flex: 1 1 100%; display: grid; gap: 8px; }
 .zone-now { background: var(--bz); color: var(--bz-ink); border: 2px solid var(--ink); border-radius: 6px; padding: 10px 14px; font-size: 1.05rem; }
 .zone-now b { font-size: 1.3rem; }
-.zone-row { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 4px; }
-.zone-btn { background: var(--bz); color: var(--bz-ink); border: 1px solid var(--rule); border-radius: 5px; font: inherit; font-size: .78rem; padding: 10px 2px; cursor: pointer; min-height: 44px; overflow: hidden; text-overflow: ellipsis; }
+.zone-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; }
+.zone-btn { background: var(--bz); color: var(--bz-ink); border: 1px solid var(--rule); border-radius: 5px; font: inherit; padding: 6px 4px; cursor: pointer; min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; }
+.zone-name { font-weight: 700; font-size: .9rem; }
+.zone-range { font-size: .8rem; }
 .zone-btn[aria-pressed="true"] { outline: 3px solid var(--ink); outline-offset: 1px; font-weight: 700; }
 
 /* Published algorithm pop-up */
@@ -305,7 +307,12 @@ td.int-low { background: var(--int-low); } td.int-moderate { background: var(--i
 .show-ins { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
 .show-ins input { width: 18px; height: 18px; }
 .swatch { width: 28px; height: 10px; }
-@media (max-width: 800px) { .zone-btn { font-size: 0; padding: 0; } }
+
+
+/* Conflicting sources */
+.conv-name { min-width: 0; }
+.alt { display: block; font-size: .84rem; color: var(--warn-ink); }
+.conv-row.conflict, table.data tr.conflict td:first-child { box-shadow: inset 4px 0 0 var(--warn-ink); padding-left: 10px; }
 
 @media print {
   .masthead nav, .patient .clear, .more, .chart-btn { display: none; }

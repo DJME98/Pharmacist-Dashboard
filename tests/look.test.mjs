@@ -50,7 +50,7 @@ test('insulin curves start and end at zero and peak in the peak window', () => {
 
 test('requested conversion classes show a table', () => {
   const shown = RATIO_TABLES.filter((t) => t.table).map((t) => t.id).sort();
-  assert.deepEqual(shown, ['ace', 'arb', 'loop', 'ppi', 'steroid']);
+  assert.deepEqual(shown, ['ace', 'arb', 'benzo', 'beta', 'loop', 'ppi', 'steroid']);
 });
 
 test('no review labels remain on the site', () => {

@@ -75,7 +75,20 @@ test('adult weight-based drugs need a weight and flat drugs do not', () => {
   assert.equal(adult('a-lido', 'Second dose', 80).dose, '40 to 60 mg');
   assert.equal(adult('a-procainamide', 'Stop at', 80).dose, '1360 mg');
   assert.equal(adult('a-dopamine', 'Rate', 80).dose, '400 to 1600 mcg/min');
-  assert.equal(adult('a-diltiazem', 'Bolus over 2 min', 80).dose, '20 mg');
+});
+
+test('ACLS no longer lists rate control or other drugs', () => {
+  const groups = new Set(ADULT_DOSES.map((d) => d.group));
+  assert.ok(!groups.has('AF or flutter rate control'));
+  assert.ok(!groups.has('Other'));
+});
+
+test('every drug says how it is given, not just IV', () => {
+  for (const d of [...ADULT_DOSES, ...PEDS_DOSES]) {
+    assert.ok(d.route && !/^(IV|IV\/IO|IO)$/.test(d.route.trim()), d.id + ': ' + d.route);
+  }
+  assert.match(ADULT_DOSES.find((d) => d.id === 'a-adenosine').route, /rapid IV push/i);
+  assert.match(ADULT_DOSES.find((d) => d.id === 'a-epi').route, /push/);
 });
 
 test('every non-weight-based adult drug is flat', () => {

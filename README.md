@@ -38,6 +38,8 @@ For reference only. Use clinical judgment, and confirm doses against current ref
 
 - ACLS and PALS: color-coded drug groups, Broselow color zones for PALS, and the published algorithm charts in a pop-up
 - Conversions: equivalence tables, a statin intensity table, and insulin action times with an overlay chart
+- Conversions round to practical doses and show where sources disagree; tables for opioids, benzodiazepines, and beta blockers
+- ACLS and PALS: how each drug is given, shocks first in cardiac arrest, and weight ranges on the Broselow zones
 
 ## Publishing
 

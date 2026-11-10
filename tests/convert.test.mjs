@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { OPIOIDS, RATIO_TABLES, STATINS, CONVERSION_ITEMS } from '../site/data/conversions.js';
 import { REFERENCES } from '../site/data/references.js';
-import { convertDose, fentanylPatch, formatRange, opioidSummary, opioidTarget, statinIntensity } from '../site/calc/convert.js';
+import { altResults, convertDose, fentanylPatch, formatRange, opioidSummary, opioidTarget, practical, roundStep, statinIntensity } from '../site/calc/convert.js';
 
 const close = (a, b, tol = 0.01) => assert.ok(Math.abs(a - b) <= tol, `${a} is not within ${tol} of ${b}`);
 const table = (id) => RATIO_TABLES.find((t) => t.id === id);
@@ -21,13 +21,30 @@ test('single-value conversions', () => {
 test('range conversions widen in both directions', () => {
   assert.deepEqual(convertDose(40, eq('loop', 'furosemide-po'), eq('loop', 'torsemide')), [10, 20]);
   assert.deepEqual(convertDose(20, eq('loop', 'torsemide'), eq('loop', 'furosemide-po')), [40, 80]);
-  assert.deepEqual(convertDose(10, eq('ace', 'lisinopril'), eq('ace', 'enalapril')), [5, 10]);
+  assert.deepEqual(convertDose(10, eq('ace', 'lisinopril'), eq('ace', 'enalapril')), [10, 10]);
   assert.deepEqual(convertDose(50, eq('arb', 'losartan'), eq('arb', 'candesartan')), [8, 16]);
 });
 
-test('PPI conversions use relative potency', () => {
-  close(convertDose(20, eq('ppi', 'omeprazole'), eq('ppi', 'esomeprazole'))[0], 12.5);
-  close(convertDose(40, eq('ppi', 'pantoprazole'), eq('ppi', 'omeprazole'))[0], 9.2);
+test('PPI conversions use standard-dose equivalence', () => {
+  assert.deepEqual(convertDose(20, eq('ppi', 'omeprazole'), eq('ppi', 'esomeprazole')), [20, 20]);
+  assert.deepEqual(convertDose(40, eq('ppi', 'pantoprazole'), eq('ppi', 'omeprazole')), [20, 20]);
+  assert.deepEqual(convertDose(30, eq('ppi', 'lansoprazole'), eq('ppi', 'pantoprazole')), [40, 40]);
+});
+
+test('practical rounding goes to the nearest real step, never zero', () => {
+  assert.equal(roundStep(9.2, 10), 10);
+  assert.equal(roundStep(13.3, 5), 15);
+  assert.equal(roundStep(0.4, 2.5), 2.5);
+  assert.deepEqual(practical([6.2, 12.4], 2.5), [5, 12.5]);
+});
+
+test('conflicting sources give their own results', () => {
+  const benzo = RATIO_TABLES.find((t) => t.id === 'benzo');
+  const from = benzo.drugs.find((d) => d.alt?.length);
+  const to = benzo.drugs.find((d) => d.id === 'diazepam');
+  const alts = altResults(10, from, to);
+  assert.ok(alts.length >= 1);
+  for (const a of alts) assert.ok(a.src && a.range.every(Number.isFinite));
 });
 
 test('range formatting', () => {

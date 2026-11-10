@@ -60,7 +60,7 @@ export function renderResus(h, kind, mount) {
         type: 'button', class: `zone-btn bz-${z.id}`, 'aria-pressed': String(zone?.id === z.id),
         title: `${z.name}, ${z.range}`, 'aria-label': `${z.name}, ${z.range}`,
         onclick: () => { s.weight = String(z.mid); input.value = s.weight; update(); },
-      }, z.name))),
+      }, h('span', { class: 'zone-name' }, z.name), h('span', { class: 'zone-range' }, z.range)))),
       h('p', { class: 'hint' }, 'Tapping a color uses the middle of its weight range. Enter the measured weight when you have it.'));
   }
   const weight = () => parseWeight(s.weight, kind);
@@ -108,6 +108,9 @@ export function renderResus(h, kind, mount) {
     const { kg } = weight();
     const groups = new Map();
     doses.forEach((d) => { if (!groups.has(d.group)) groups.set(d.group, []); groups.get(d.group).push(d); });
+    // Shocks lead the cardiac arrest group.
+    const arrest = groups.get('Cardiac arrest');
+    if (arrest) arrest.sort((a, b) => (DOSE_CATEGORY[b.id] === 'elec') - (DOSE_CATEGORY[a.id] === 'elec'));
     put(list, h('div', { class: 'legend cats' }, CATEGORIES.filter((c) => doses.some((d) => DOSE_CATEGORY[d.id] === c.id)).map((c) => h('span', { class: `key-chip cat-${c.id}` }, c.label))),
       ...[...groups].map(([title, items]) => h('section', { class: 'group' },
       h('h2', {}, title),
@@ -137,7 +140,7 @@ export function renderResus(h, kind, mount) {
   }
 
   const help = kind === 'acls'
-    ? 'Only used for weight-based drugs: lidocaine, procainamide, dopamine, and some rate-control drugs.'
+    ? 'Only used for weight-based drugs: lidocaine, procainamide, and dopamine.'
     : 'Every dose and shock below uses this weight.';
 
   const input = h('input', {

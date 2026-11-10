@@ -60,3 +60,24 @@ export function statinIntensity(table, drugId, dose) {
     .filter((d) => d.doses.length > 0);
   return { intensity, matches };
 }
+
+// Rounds to the nearest practical increment, never below one increment.
+export function roundStep(x, step) {
+  if (!step || !Number.isFinite(x) || x <= 0) return x;
+  return Math.max(step, Math.round(x / step + 1e-9) * step);
+}
+
+export const practical = ([lo, hi], step) => [roundStep(lo, step), roundStep(hi, step)];
+
+// Results from other sources that list a different value for either drug.
+export function altResults(dose, from, to) {
+  const srcs = new Set([...(from.alt ?? []), ...(to.alt ?? [])].map((a) => a.src));
+  const out = [];
+  for (const src of srcs) {
+    const f = from.alt?.find((a) => a.src === src)?.v ?? from.equiv;
+    const t = to.alt?.find((a) => a.src === src)?.v ?? to.equiv;
+    const note = [...(from.alt ?? []), ...(to.alt ?? [])].find((a) => a.src === src && a.note)?.note;
+    out.push({ src, range: convertDose(dose, f, t), note });
+  }
+  return out;
+}
