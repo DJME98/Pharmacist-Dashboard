@@ -18,6 +18,9 @@
   --danger: #A61B1B;
   --crcl: #5A3473;
   --egfr: #0B6E74;
+  --c-pressor: #C62828; --c-anti: #1565C0; --c-rate: #00796B; --c-elec: #A15C00; --c-chol: #2E7D32; --c-lytes: #AD1457; --c-rev: #546E7A;
+  --ins-ultra: #E65100; --ins-inhaled: #AD1457; --ins-rapid: #C62828; --ins-short: #6A1B9A; --ins-intermediate: #1565C0; --ins-long: #2E7D32;
+  --int-low: #E3F2FD; --int-moderate: #BBDEFB; --int-high: #64B5F6;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -35,6 +38,9 @@
     --danger: #FF9C9C;
     --crcl: #CDB0E2;
     --egfr: #6FD6DC;
+    --c-pressor: #FF8A80; --c-anti: #82B1FF; --c-rate: #4DD0C1; --c-elec: #FFCA28; --c-chol: #81C784; --c-lytes: #F48FB1; --c-rev: #B0BEC5;
+    --ins-ultra: #FFB74D; --ins-inhaled: #F48FB1; --ins-rapid: #FF8A80; --ins-short: #CE93D8; --ins-intermediate: #82B1FF; --ins-long: #81C784;
+    --int-low: #1C2B3A; --int-moderate: #1F3D5C; --int-high: #2B5F91;
   }
 }
 :root[data-theme="dark"] {
@@ -42,6 +48,9 @@
   --ground: #17141D; --surface: #221E2A; --ink: #F0EDF5; --muted: #B3ACBF; --rule: #3C3647;
   --plum: #2C1A3A; --plum-ink: #CDB0E2; --tint: #352A42; --warn-bg: #43330B; --warn-ink: #FFE3A1;
   --danger: #FF9C9C; --crcl: #CDB0E2; --egfr: #6FD6DC;
+    --c-pressor: #FF8A80; --c-anti: #82B1FF; --c-rate: #4DD0C1; --c-elec: #FFCA28; --c-chol: #81C784; --c-lytes: #F48FB1; --c-rev: #B0BEC5;
+    --ins-ultra: #FFB74D; --ins-inhaled: #F48FB1; --ins-rapid: #FF8A80; --ins-short: #CE93D8; --ins-intermediate: #82B1FF; --ins-long: #81C784;
+    --int-low: #1C2B3A; --int-moderate: #1F3D5C; --int-high: #2B5F91;
 }
 
 * { box-sizing: border-box; }
@@ -245,6 +254,59 @@ table.data th:first-child, table.data td:first-child { text-align: left; padding
 table.data.ivpo td, table.data.ivpo th { text-align: left; white-space: normal; }
 .conv-row b .unit { font-weight: 400; }
 
+
+/* Footer note */
+.site-foot { max-width: 1180px; margin: 0 auto; padding: 18px max(16px, env(safe-area-inset-left)) 32px; color: var(--muted); font-size: .9rem; border-top: 1px solid var(--rule); }
+
+/* Drug color groups */
+.cat-pressor { --cat: var(--c-pressor); } .cat-anti { --cat: var(--c-anti); } .cat-rate { --cat: var(--c-rate); }
+.cat-elec { --cat: var(--c-elec); } .cat-chol { --cat: var(--c-chol); } .cat-lytes { --cat: var(--c-lytes); } .cat-rev { --cat: var(--c-rev); }
+.dose.cat-card { border-left: 6px solid var(--cat); padding-left: 12px; }
+.dose.cat-card .dose-name { color: var(--cat); }
+mark.chip { background: none; color: var(--cat); font-weight: 700; border-bottom: 2px solid var(--cat); padding: 0 1px; }
+.legend.cats { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 6px; font-size: .88rem; color: var(--ink); }
+.key-chip { display: inline-flex; align-items: center; gap: 6px; }
+.key-chip::before { content: ""; width: 12px; height: 12px; border-radius: 3px; background: var(--cat); }
+
+/* Broselow zones */
+.bz-grey { --bz: #9E9E9E; --bz-ink: #111; } .bz-pink { --bz: #F48FB1; --bz-ink: #111; } .bz-red { --bz: #D32F2F; --bz-ink: #fff; }
+.bz-purple { --bz: #7B1FA2; --bz-ink: #fff; } .bz-yellow { --bz: #FDD835; --bz-ink: #111; } .bz-white { --bz: #FFFFFF; --bz-ink: #111; }
+.bz-blue { --bz: #1E88E5; --bz-ink: #fff; } .bz-orange { --bz: #FB8C00; --bz-ink: #111; } .bz-green { --bz: #388E3C; --bz-ink: #fff; }
+.bz-none { --bz: var(--surface); --bz-ink: var(--muted); }
+.broselow { flex: 1 1 100%; display: grid; gap: 8px; }
+.zone-now { background: var(--bz); color: var(--bz-ink); border: 2px solid var(--ink); border-radius: 6px; padding: 10px 14px; font-size: 1.05rem; }
+.zone-now b { font-size: 1.3rem; }
+.zone-row { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 4px; }
+.zone-btn { background: var(--bz); color: var(--bz-ink); border: 1px solid var(--rule); border-radius: 5px; font: inherit; font-size: .78rem; padding: 10px 2px; cursor: pointer; min-height: 44px; overflow: hidden; text-overflow: ellipsis; }
+.zone-btn[aria-pressed="true"] { outline: 3px solid var(--ink); outline-offset: 1px; font-weight: 700; }
+
+/* Published algorithm pop-up */
+.chart-btn { font: inherit; font-weight: 700; background: var(--surface); color: var(--plum-ink); border: 2px solid var(--plum-ink); border-radius: 6px; padding: 9px 14px; margin: 0 0 16px; cursor: pointer; }
+.chart-dialog { width: min(1000px, 96vw); height: min(92vh, 1200px); padding: 0; border: 0; border-radius: 8px; background: var(--surface); color: var(--ink); }
+.chart-dialog[open] { display: flex; flex-direction: column; }
+.chart-dialog::backdrop { background: rgba(20, 14, 28, .6); }
+.chart-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 10px 14px; border-bottom: 1px solid var(--rule); }
+.chart-title { flex: 1 1 260px; font-weight: 700; font-size: .95rem; }
+.chart-close { font: inherit; background: var(--plum); color: var(--on-plum); border: 0; border-radius: 6px; padding: 8px 14px; cursor: pointer; }
+.chart-frame { flex: 1; width: 100%; border: 0; background: #fff; }
+.chart-dialog .hint { padding: 6px 14px 10px; }
+
+/* Tables and insulin chart */
+table.data.list td, table.data.list th { text-align: left; white-space: normal; }
+table.data.list td:first-child { font-weight: 700; }
+td.int-low { background: var(--int-low); } td.int-moderate { background: var(--int-moderate); } td.int-high { background: var(--int-high); }
+.ins-chart { width: 100%; min-width: 520px; height: auto; display: block; margin: 8px 0; }
+.ins-chart .grid { stroke: var(--rule); stroke-width: 1; }
+.ins-chart .axis { stroke: var(--ink); stroke-width: 1.5; }
+.ins-chart .tick { fill: var(--muted); font-size: 12px; font-family: inherit; }
+.curve { fill: none; stroke-width: 2.5; stroke-linejoin: round; }
+.ins-ultra { stroke: var(--ins-ultra); } .ins-inhaled { stroke: var(--ins-inhaled); } .ins-rapid { stroke: var(--ins-rapid); }
+.ins-short { stroke: var(--ins-short); } .ins-intermediate { stroke: var(--ins-intermediate); } .ins-long { stroke: var(--ins-long); }
+.show-ins { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.show-ins input { width: 18px; height: 18px; }
+.swatch { width: 28px; height: 10px; }
+@media (max-width: 800px) { .zone-btn { font-size: 0; padding: 0; } }
+
 @media print {
-  .masthead nav, .patient .clear, .more { display: none; }
+  .masthead nav, .patient .clear, .more, .chart-btn { display: none; }
 }

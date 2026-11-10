@@ -1,5 +1,20 @@
 // Pure helpers for resuscitation doses. Data lives in data/resus.js.
 
+// Broselow-Luten color zones, kg. Upper bound exclusive so zones meet without gaps.
+export const BROSELOW = [
+  { id: 'grey', name: 'Grey', range: '3 to 5 kg', lo: 3, hi: 6, mid: 4 },
+  { id: 'pink', name: 'Pink', range: '6 to 7 kg', lo: 6, hi: 8, mid: 6.5 },
+  { id: 'red', name: 'Red', range: '8 to 9 kg', lo: 8, hi: 10, mid: 8.5 },
+  { id: 'purple', name: 'Purple', range: '10 to 11 kg', lo: 10, hi: 12, mid: 10.5 },
+  { id: 'yellow', name: 'Yellow', range: '12 to 14 kg', lo: 12, hi: 15, mid: 13 },
+  { id: 'white', name: 'White', range: '15 to 18 kg', lo: 15, hi: 19, mid: 16.5 },
+  { id: 'blue', name: 'Blue', range: '19 to 23 kg', lo: 19, hi: 24, mid: 21 },
+  { id: 'orange', name: 'Orange', range: '24 to 29 kg', lo: 24, hi: 30, mid: 26.5 },
+  { id: 'green', name: 'Green', range: '30 to 36 kg', lo: 30, hi: 37, mid: 33 },
+];
+
+export const broselowZone = (kg) => (kg === null || kg === undefined ? null : BROSELOW.find((z) => kg >= z.lo && kg < z.hi) ?? null);
+
 export const WEIGHT_LIMITS = { acls: [20, 400], pals: [0.3, 200], care: [0.3, 400] };
 
 export function parseWeight(text, kind) {

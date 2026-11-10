@@ -116,6 +116,9 @@ export const REFERENCES = {
   springerInsulin: { cite: 'Inpatient use of second-generation basal insulins. Diabetes Ther. 2020.', url: 'https://link.springer.com/10.1007/s13300-020-00920-z', checked: 'primary' },
   sbIvpo: { cite: 'Stony Brook University Hospital. IV to PO conversion protocol, 2024.', url: 'https://renaissance.stonybrookmedicine.edu/system/files/IV%20to%20PO%20Conversion%20Protocol%20-%20SBSH%20%2848368_0%29.pdf', checked: 'secondary' },
   nmIvpo: { cite: 'Northwestern Medicine ADSP. IV to PO antibiotic table.', url: 'https://adsp.nm.org/uploads/1/4/3/0/143064172/iv_to_po_abx_table.pdf', checked: 'secondary' },
+  dmjInsulin: { cite: 'A century of progress in diabetes care with insulin: a history of innovations and foundation for the future. Diabetes Metab J. 2021;45(5):629-640, Table 1.', url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC8497924/table/t1-dmj-2021-0163', checked: 'primary', note: 'Table read directly.' },
+  adcesInsulin: { cite: 'ADCES Danatech. Insulin types.', url: 'https://www.adces.org/danatech/insulin-medicine-delivery/insulin-medicine-delivery-101/insulin-types', checked: 'secondary', note: 'Source of the inhaled insulin times.' },
+  wikemBroselow: { cite: 'WikEM. Broselow tape: color zones.', url: 'https://wikem.org/wiki/Broselow_tape', checked: 'secondary', note: 'Does not name the tape version.' },
 };
 
 export const REFERENCES_ACCESSED = ACCESSED;

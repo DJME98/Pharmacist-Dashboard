@@ -3,6 +3,8 @@ import { OPIOIDS, OPIOID_ITEM, RATIO_TABLES, STATINS, STATIN_ITEM, INTENSITY_LAB
 import { REFERENCES } from './data/references.js';
 import { convertDose, fentanylPatch, formatRange, opioidSummary, opioidTarget, statinIntensity } from './calc/convert.js';
 import { formatNumber } from './calc/resus.js';
+import { INSULINS, INSULIN_KIND_LABEL, INSULIN_DEFAULT, INSULIN_KINETICS_ITEM } from './data/insulin.js';
+import { activity } from './calc/insulin.js';
 
 // Doses are held only in this object and are never stored or sent.
 const state = {
@@ -16,6 +18,8 @@ const state = {
   insulinDose: '',
   statin: 'atorvastatin',
   statinDose: '40',
+  insulinShow: new Set(INSULIN_DEFAULT),
+  insulinHours: 24,
 };
 
 const num = (t) => {
@@ -32,7 +36,6 @@ export function renderConvert(h, mount) {
   const body = h('div', {});
 
   const footer = (item) => [
-    h('p', { class: 'status' }, 'Unverified: awaiting pharmacist review'),
     h('details', { class: 'sources' }, h('summary', {}, 'Sources'),
       h('ol', { class: 'row-refs' }, item.refs.map((id) => {
         const r = REFERENCES[id];
@@ -85,8 +88,94 @@ export function renderConvert(h, mount) {
         select('from', 'Convert from', s.from, drugs.map((d) => [d.id, d.name]), (v) => { s.from = v; calc(); }),
         input('dose', `Dose (${table.unit})`, s.dose, (v) => { s.dose = v; calc(); })),
       out,
+      table.table && equivalenceTable(table, drugs),
       ...footer(table));
     calc();
+  }
+
+  function equivalenceTable(table, drugs) {
+    const notes = drugs.some((d) => d.detail);
+    return h('section', { class: 'group' },
+      h('h2', {}, 'Equivalence table'),
+      h('div', { class: 'scroll' }, h('table', { class: 'data list' },
+        h('thead', {}, h('tr', {}, ['Drug', `Equivalent dose (${table.unit})`, notes && 'Notes'].filter(Boolean).map((t) => h('th', { scope: 'col' }, t)))),
+        h('tbody', {}, drugs.map((d) => h('tr', {},
+          h('td', {}, d.name),
+          h('td', {}, formatRange(Array.isArray(d.equiv) ? d.equiv : [d.equiv, d.equiv], '').trim()),
+          notes && h('td', {}, d.detail ?? '')))))));
+  }
+
+  function statinTable() {
+    const cols = ['low', 'moderate', 'high'];
+    return h('section', { class: 'group' },
+      h('h2', {}, 'Statins by intensity'),
+      h('div', { class: 'scroll' }, h('table', { class: 'data list' },
+        h('thead', {}, h('tr', {}, ['Statin', 'Low', 'Moderate', 'High'].map((t) => h('th', { scope: 'col' }, t)))),
+        h('tbody', {}, STATINS.map((d) => h('tr', {}, h('td', {}, d.name), cols.map((c) => {
+          const doses = Object.keys(d.doses).filter((k) => d.doses[k] === c);
+          return h('td', { class: doses.length ? `int-${c}` : '' }, doses.length ? `${doses.join(', ')} mg` : '');
+        })))))),
+      h('ul', { class: 'plain' }, cols.slice().reverse().map((c) => h('li', {}, INTENSITY_LABEL[c]))));
+  }
+
+  function insulinChart() {
+    const W = 640;
+    const H = 260;
+    const pad = { l: 40, r: 14, t: 14, b: 36 };
+    const hours = state.insulinHours;
+    const x = (t) => pad.l + (t / hours) * (W - pad.l - pad.r);
+    const y = (v) => H - pad.b - v * (H - pad.t - pad.b);
+    const ns = 'http://www.w3.org/2000/svg';
+    const el = (tag, attrs, ...kids) => {
+      const n = document.createElementNS(ns, tag);
+      for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+      kids.forEach((k) => n.append(k));
+      return n;
+    };
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, class: 'ins-chart', role: 'img', 'aria-label': 'Schematic insulin action curves over time' });
+    const step = hours <= 12 ? 2 : hours <= 24 ? 4 : 6;
+    for (let t = 0; t <= hours; t += step) {
+      svg.append(el('line', { x1: x(t), x2: x(t), y1: pad.t, y2: H - pad.b, class: 'grid' }));
+      svg.append(el('text', { x: x(t), y: H - pad.b + 18, 'text-anchor': 'middle', class: 'tick' }, `${t}`));
+    }
+    svg.append(el('line', { x1: pad.l, x2: W - pad.r, y1: H - pad.b, y2: H - pad.b, class: 'axis' }));
+    svg.append(el('text', { x: (W + pad.l) / 2, y: H - 4, 'text-anchor': 'middle', class: 'tick' }, 'Hours after the dose'));
+    svg.append(el('text', { x: 12, y: (H - pad.b + pad.t) / 2, 'text-anchor': 'middle', class: 'tick', transform: `rotate(-90 12 ${(H - pad.b + pad.t) / 2})` }, 'Activity'));
+    INSULINS.forEach((ins, i) => {
+      if (!state.insulinShow.has(ins.id)) return;
+      const pts = [];
+      for (let k = 0; k <= 400; k += 1) { const t = (k / 400) * hours; pts.push(`${x(t).toFixed(1)},${y(activity(t, ins)).toFixed(1)}`); }
+      svg.append(el('polyline', { points: pts.join(' '), class: `curve ins-${ins.kind}`, 'stroke-dasharray': ['', '7 4', '2 3'][i % 3] }));
+    });
+    return svg;
+  }
+
+  function insulinKinetics() {
+    const chartWrap = h('div', { class: 'scroll' });
+    const redraw = () => put(chartWrap, insulinChart());
+    const rangeBtns = h('div', { class: 'algo-picker', role: 'group', 'aria-label': 'Time range' });
+    const drawRange = () => put(rangeBtns, [12, 24, 48].map((hrs) => h('button', {
+      type: 'button', 'aria-pressed': String(state.insulinHours === hrs),
+      onclick: () => { state.insulinHours = hrs; drawRange(); redraw(); },
+    }, `${hrs} h`)));
+    drawRange();
+    redraw();
+    return h('section', { class: 'group' },
+      h('h2', {}, 'Insulin action times'),
+      h('div', { class: 'scroll' }, h('table', { class: 'data list' },
+        h('thead', {}, h('tr', {}, ['Show', 'Insulin', 'Type', 'Onset', 'Peak', 'Duration'].map((t) => h('th', { scope: 'col' }, t)))),
+        h('tbody', {}, INSULINS.map((ins, i) => h('tr', {},
+          h('td', {}, h('label', { class: 'show-ins' },
+            h('input', { type: 'checkbox', checked: state.insulinShow.has(ins.id), 'aria-label': `Show ${ins.name} on the chart`,
+              onchange: (e) => { if (e.target.checked) state.insulinShow.add(ins.id); else state.insulinShow.delete(ins.id); redraw(); } }),
+            h('span', { class: 'swatch-slot', 'data-i': String(i) }))),
+          h('td', {}, ins.name, ins.note && h('span', { class: 'basis' }, ins.note)),
+          h('td', {}, INSULIN_KIND_LABEL[ins.kind]),
+          ins.text.map((t) => h('td', {}, t))))))),
+      rangeBtns,
+      chartWrap,
+      h('p', { class: 'hint' }, 'Schematic. Curves are drawn from the onset, peak, and duration in the table to show timing only; heights do not compare strength. Peakless insulins are drawn as flat plateaus. Action varies with dose, site, and patient.'),
+      ...footer(INSULIN_KINETICS_ITEM));
   }
 
   function drawStatin() {
@@ -111,6 +200,7 @@ export function renderConvert(h, mount) {
         select('statin', 'Statin', state.statin, STATINS.map((d) => [d.id, d.name]), (v) => { state.statin = v; drawDose(); calc(); }),
         doseWrap),
       out,
+      statinTable(),
       ...footer(STATIN_ITEM));
     drawDose();
     calc();
@@ -203,7 +293,21 @@ export function renderConvert(h, mount) {
         select('ins-rule', 'Conversion', state.insulinRule, BASAL_RULES.map((r) => [r.id, r.label]), (v) => { state.insulinRule = v; calc(); }),
         input('ins-dose', 'Current total daily dose (units)', state.insulinDose, (v) => { state.insulinDose = v; calc(); })),
       out,
-      ...footer(INSULIN_ITEM));
+      ...footer(INSULIN_ITEM),
+      insulinKinetics());
+    body.querySelectorAll('.swatch-slot').forEach((slot) => {
+      const i = Number(slot.dataset.i);
+      const ins = INSULINS[i];
+      const ns = 'http://www.w3.org/2000/svg';
+      const sw = document.createElementNS(ns, 'svg');
+      sw.setAttribute('viewBox', '0 0 28 10');
+      sw.setAttribute('class', 'swatch');
+      sw.setAttribute('aria-hidden', 'true');
+      const line = document.createElementNS(ns, 'line');
+      Object.entries({ x1: 1, x2: 27, y1: 5, y2: 5, class: `curve ins-${ins.kind}`, 'stroke-dasharray': ['', '7 4', '2 3'][i % 3] }).forEach(([k, v]) => line.setAttribute(k, v));
+      sw.append(line);
+      slot.replaceWith(sw);
+    });
     calc();
   }
 

@@ -31,7 +31,7 @@ function sources(h, ids) {
 
 function item(h, id) {
   const it = PK_ITEMS.find((x) => x.id === id);
-  return [h('p', { class: 'status' }, 'Unverified: awaiting pharmacist review'), sources(h, it.refs)];
+  return [sources(h, it.refs)];
 }
 
 function textField(h, state, key, label, onChange, hint) {

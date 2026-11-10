@@ -14,7 +14,6 @@ const drip = { dose: '', doseUnit: 'mcg/kg/min', kg: '', amount: '', amountUnit:
 
 function footer(h, item) {
   return [
-    h('p', { class: 'status' }, 'Unverified: awaiting pharmacist review'),
     h('details', { class: 'sources' }, h('summary', {}, 'Sources'),
       h('ol', { class: 'row-refs' }, item.refs.map((id) => {
         const r = REFERENCES[id];

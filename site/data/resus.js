@@ -221,7 +221,7 @@ export const ALGORITHMS = [
     },
   },
   {
-    id: 'pals-arrest', kind: 'pals', name: 'Cardiac arrest', start: 'start', refs: ['ahaPalsCa', 'aha25Part8'], review: UNREVIEWED,
+    id: 'pals-arrest', kind: 'pals', name: 'Cardiac arrest', start: 'start', refs: ['ahaPalsCa', 'aha25Part8', 'wikemBroselow'], review: UNREVIEWED,
     steps: {
       start: { title: 'Start resuscitation', lines: ['Start CPR, give oxygen by bag-mask, attach monitor/defibrillator.', PEDS_CPR, PEDS_AIR], ask: 'What is the rhythm?', branches: [{ label: 'VF or pulseless VT', to: 's1' }, { label: 'Asystole or PEA', to: 'n1' }] },
       s1: { title: 'First shock', lines: ['Shock: {{p-shock:0}}.', 'CPR for 2 min. Get IV/IO access.'], ask: 'Rhythm check', branches: SHOCKABLE('s2', 'n2') },
@@ -268,5 +268,37 @@ export const ALGORITHMS = [
     },
   },
 ];
+
+// Color group for each dose, used on the dose cards and inside algorithm steps.
+export const CATEGORIES = [
+  { id: 'pressor', label: 'Epinephrine and vasopressors' },
+  { id: 'anti', label: 'Antiarrhythmics' },
+  { id: 'rate', label: 'Rate control' },
+  { id: 'elec', label: 'Shocks' },
+  { id: 'chol', label: 'Atropine' },
+  { id: 'lytes', label: 'Electrolytes and glucose' },
+  { id: 'rev', label: 'Naloxone' },
+];
+
+export const DOSE_CATEGORY = {
+  'a-epi': 'pressor', 'a-dopamine': 'pressor', 'a-epi-inf': 'pressor',
+  'a-amio': 'anti', 'a-lido': 'anti', 'a-adenosine': 'anti', 'a-amio-vt': 'anti', 'a-procainamide': 'anti',
+  'a-diltiazem': 'rate', 'a-verapamil': 'rate', 'a-esmolol': 'rate', 'a-metoprolol': 'rate', 'a-propranolol': 'rate', 'a-amio-rate': 'rate', 'a-digoxin': 'rate',
+  'a-shock': 'elec', 'a-cardiovert': 'elec',
+  'a-atropine': 'chol',
+  'a-mag': 'lytes', 'a-notroutine': 'lytes',
+  'p-epi': 'pressor', 'p-epi-et': 'pressor', 'p-epi-inf': 'pressor', 'p-norepi': 'pressor', 'p-dopamine': 'pressor', 'p-dobutamine': 'pressor',
+  'p-amio': 'anti', 'p-lido': 'anti', 'p-adenosine': 'anti', 'p-amio-vt': 'anti', 'p-procainamide': 'anti', 'p-lido-inf': 'anti',
+  'p-shock': 'elec', 'p-cardiovert': 'elec',
+  'p-atropine': 'chol',
+  'p-calcium': 'lytes', 'p-calcium-gluc': 'lytes', 'p-bicarb': 'lytes', 'p-glucose': 'lytes', 'p-mag': 'lytes',
+  'p-naloxone': 'rev',
+};
+
+// The published chart for each algorithm, opened from AHA (or Red Cross) servers.
+export const CHARTS = {
+  'acls-arrest': 'ahaAclsCa', 'acls-brady': 'ahaAclsBrady', 'acls-tachy': 'ahaAclsTachy', 'acls-post': 'ahaAclsPcac',
+  'pals-arrest': 'ahaPalsCa', 'pals-brady': 'ahaPalsBrady', 'pals-tachy': 'redcrossPalsTachy', 'pals-post': 'ahaPalsPcac',
+};
 
 export const RESUS_ITEMS = [...ADULT_DOSES, ...PEDS_DOSES, ...ALGORITHMS];

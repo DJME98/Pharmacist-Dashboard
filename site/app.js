@@ -7,6 +7,7 @@ import { renderResus } from './resus-view.js';
 import { PK_ITEMS } from './data/pk.js';
 import { renderVanco, renderAmino } from './pk-view.js';
 import { CONVERSION_ITEMS } from './data/conversions.js';
+import { INSULIN_KINETICS_ITEM } from './data/insulin.js';
 import { renderConvert } from './convert-view.js';
 import { CARE_ITEMS } from './data/care.js';
 import { TOOL_ITEMS } from './data/tools.js';
@@ -122,9 +123,6 @@ function row(calc, p, res) {
       res.used && h('p', {}, res.used),
       calc.note && h('p', {}, calc.note),
       calc.kind === 'egfr' && p.isAdult && h('p', {}, 'KDIGO 2024 practice point 4.2.4: non-indexed eGFR may be indicated at extremes of body weight.'),
-      h('p', { class: 'status' }, calc.review.status === 'verified'
-        ? `Reviewed by ${calc.review.by} on ${calc.review.date}`
-        : 'Unverified: awaiting pharmacist review'),
       refList(calc)));
 }
 
@@ -205,7 +203,7 @@ function referencesPage() {
       list.querySelectorAll('li').forEach((li) => { li.hidden = q !== '' && !li.textContent.toLowerCase().includes(q); });
     },
   });
-  const usedBy = (id) => [...CALCULATIONS, ...RESUS_ITEMS, ...PK_ITEMS, ...CONVERSION_ITEMS, ...CARE_ITEMS, ...TOOL_ITEMS].filter((c) => c.refs.includes(id)).map((c) => (c.kind === 'acls' || c.kind === 'pals' ? `${c.kind.toUpperCase()} ${c.name.toLowerCase()} algorithm` : c.name));
+  const usedBy = (id) => [...CALCULATIONS, ...RESUS_ITEMS, ...PK_ITEMS, ...CONVERSION_ITEMS, INSULIN_KINETICS_ITEM, ...CARE_ITEMS, ...TOOL_ITEMS].filter((c) => c.refs.includes(id)).map((c) => (c.kind === 'acls' || c.kind === 'pals' ? `${c.kind.toUpperCase()} ${c.name.toLowerCase()} algorithm` : c.name));
   const entries = Object.entries(REFERENCES).sort((a, b) => a[1].cite.localeCompare(b[1].cite));
   const list = h('ul', { class: 'ref-list' }, entries.map(([id, r]) => h('li', {},
     h('p', { class: 'ref-cite' }, r.url ? h('a', { href: r.url, target: '_blank', rel: 'noopener' }, r.cite) : r.cite),
@@ -213,7 +211,7 @@ function referencesPage() {
     usedBy(id).length > 0 && h('p', { class: 'ref-meta' }, `Used by: ${usedBy(id).join('; ')}`))));
   return h('div', { class: 'refs-page' },
     h('h1', {}, 'References'),
-    h('p', {}, `Sources were last checked on ${REFERENCES_ACCESSED}. The label under each one says how far it was checked. None of this replaces pharmacist review.`),
+    h('p', {}, `Sources were last checked on ${REFERENCES_ACCESSED}. The label under each one says how far it was checked.`),
     search, list);
 }
 

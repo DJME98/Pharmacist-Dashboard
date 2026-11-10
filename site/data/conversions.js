@@ -50,6 +50,7 @@ export const RATIO_TABLES = [
     refs: ['ashton2007', 'oregonBenzo'], review: UNREVIEWED,
   },
   {
+    table: true,
     id: 'steroid', name: 'Steroids', unit: 'mg',
     intro: 'Systemic glucocorticoid doses treated as equivalent, based on total daily dose.',
     caution: 'Glucocorticoid equivalence only. Mineralocorticoid effect and duration differ, so adjust the schedule for each drug.',
@@ -87,6 +88,7 @@ export const RATIO_TABLES = [
     refs: ['wikemBeta', 'empendiumBeta'], review: UNREVIEWED,
   },
   {
+    table: true,
     id: 'ace', name: 'ACE inhibitors', unit: 'mg',
     intro: 'Approximate daily doses treated as equivalent to lisinopril 10 mg.',
     caution: 'Approximate. Consider starting lower and titrating. Recheck blood pressure, creatinine, and electrolytes in 1 to 2 weeks. Use lower doses in renal or hepatic impairment and older age.',
@@ -103,6 +105,7 @@ export const RATIO_TABLES = [
     refs: ['bpacAce', 'albertaAceArb'], review: UNREVIEWED,
   },
   {
+    table: true,
     id: 'arb', name: 'ARBs', unit: 'mg',
     intro: 'Approximate daily antihypertensive doses treated as equivalent.',
     caution: 'Estimated equivalences for hypertension. Monitor after the switch. For heart failure, use the agent’s own target dose.',
@@ -119,6 +122,7 @@ export const RATIO_TABLES = [
     refs: ['medsaskArb', 'albertaAceArb'], review: UNREVIEWED,
   },
   {
+    table: true,
     id: 'ppi', name: 'PPIs', unit: 'mg',
     intro: 'Equivalent acid-suppressing dose based on relative potency for raising intragastric pH (omeprazole = 1).',
     caution: 'Based on acid suppression over a limited dose range. Calculated doses may not match available strengths, and your formulary interchange may differ.',
@@ -160,6 +164,7 @@ export const RATIO_TABLES = [
     refs: ['aappAntipsychotic'], review: UNREVIEWED,
   },
   {
+    table: true,
     id: 'loop', name: 'Loop diuretics', unit: 'mg',
     intro: 'Approximate equivalent doses.',
     caution: 'Oral furosemide absorption varies widely (10% to 100%). Torsemide equivalence differs between references.',
