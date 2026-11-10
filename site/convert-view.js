@@ -36,18 +36,21 @@ export function renderConvert(h, mount) {
   const body = h('div', {});
 
   const footer = (item) => [
+    item.basis && h('div', { class: 'basis-box' }, h('h3', {}, 'Where these numbers come from'), h('p', {}, item.basis)),
     h('details', { class: 'sources' }, h('summary', {}, 'Sources'),
-      h('ol', { class: 'row-refs' }, item.refs.map((id) => {
+      h('ol', { class: 'row-refs' }, [...new Set([...item.refs, ...(item.basisRefs ?? [])])].map((id) => {
         const r = REFERENCES[id];
         return h('li', {}, r.url ? h('a', { href: r.url, target: '_blank', rel: 'noopener' }, r.cite) : r.cite,
           r.note && h('span', { class: 'ref-note' }, ` ${r.note}`));
       }))),
   ];
 
-  const select = (id, label, value, options, onchange) => h('div', { class: 'field' },
+  const select = (id, label, value, options, onchange, cls = '') => h('div', { class: `field ${cls}`.trim() },
     h('label', { for: id }, label),
     h('div', { class: 'control' }, h('select', { id, class: 'wide', onchange: (e) => onchange(e.target.value) },
-      options.map(([v, t]) => h('option', { value: v, selected: value === v }, t)))));
+      options.map((o) => (o.group
+        ? h('optgroup', { label: o.group }, o.options.map(([v, t]) => h('option', { value: v, selected: value === v }, t)))
+        : h('option', { value: o[0], selected: value === o[0] }, o[1]))))));
 
   const input = (id, label, value, oninput, hint) => h('div', { class: 'field' },
     h('label', { for: id }, label),
@@ -94,7 +97,9 @@ export function renderConvert(h, mount) {
       h('p', { class: 'alert' }, table.caution),
       h('div', { class: 'pk-grid' },
         table.methods && select('method', 'Method', s.method, table.methods.map((m) => [m.id, m.label]), (v) => { s.method = v; drawRatio(table); }),
-        select('from', 'Convert from', s.from, drugs.map((d) => [d.id, d.name]), (v) => { s.from = v; calc(); }),
+        select('from', 'Convert from', s.from, table.groups
+          ? table.groups.map((g) => ({ group: g.label, options: drugs.filter((d) => d.group === g.id).map((d) => [d.id, d.name]) }))
+          : drugs.map((d) => [d.id, d.name]), (v) => { s.from = v; calc(); }),
         input('dose', `Dose (${table.unit})`, s.dose, (v) => { s.dose = v; calc(); })),
       out,
       table.table && equivalenceTable(table, drugs),
@@ -102,19 +107,44 @@ export function renderConvert(h, mount) {
     calc();
   }
 
+  const DUR_LABEL = { short: 'Short', mid: 'Intermediate', long: 'Long' };
+
+  function durationBar(d, maxH) {
+    if (!d.dur) return h('span', { class: 'basis' }, 'Not reported');
+    const [lo, hi] = d.dur;
+    const text = d.durText ?? (lo === hi ? `${lo} h` : `${lo} to ${hi} h`);
+    return h('div', { class: 'dur' },
+      h('span', { class: `dur-track dur-${d.durClass}`, role: 'img', 'aria-label': `${DUR_LABEL[d.durClass]}: ${text}` },
+        h('span', { class: 'dur-solid', style: `width:${(lo / maxH) * 100}%` }),
+        hi > lo && h('span', { class: 'dur-range', style: `left:${(lo / maxH) * 100}%;width:${((hi - lo) / maxH) * 100}%` })),
+      h('span', { class: 'dur-text' }, text));
+  }
+
   function equivalenceTable(table, drugs) {
     const notes = drugs.some((d) => d.detail);
     const conflicts = drugs.some((d) => d.alt);
+    const durations = Boolean(table.durationLabel);
+    const maxH = durations ? Math.max(...drugs.filter((d) => d.dur).map((d) => d.dur[1])) : 0;
     const fmt = (v) => formatRange(Array.isArray(v) ? v : [v, v], '').trim();
+    const cols = ['Drug', `Equivalent dose (${table.unit})`, durations && table.durationLabel, conflicts && 'Other sources', notes && 'Notes'].filter(Boolean);
+    const row = (d) => h('tr', { class: d.alt ? 'conflict' : '' },
+      h('td', {}, d.name),
+      h('td', {}, fmt(d.equiv)),
+      durations && h('td', {}, durationBar(d, maxH)),
+      conflicts && h('td', {}, (d.alt ?? []).map((a) => `${SOURCES[a.src].label}: ${fmt(a.v)}${a.note ? ` (${a.note})` : ''}`).join('; ')),
+      notes && h('td', {}, d.detail ?? ''));
+    const bodyRows = table.groups
+      ? table.groups.flatMap((g) => [
+        h('tr', { class: `group-row grp-${g.id}` }, h('th', { scope: 'rowgroup', colspan: String(cols.length) }, g.label)),
+        ...drugs.filter((d) => d.group === g.id).map(row)])
+      : drugs.map(row);
     return h('section', { class: 'group' },
       h('h2', {}, 'Equivalence table'),
+      durations && h('p', { class: 'dur-legend' }, ['short', 'mid', 'long'].map((c) => h('span', { class: `dur-key dur-${c}` }, DUR_LABEL[c])),
+        h('span', { class: 'hint' }, ' Longer bar, longer acting. The lighter part shows the range.')),
       h('div', { class: 'scroll' }, h('table', { class: 'data list' },
-        h('thead', {}, h('tr', {}, ['Drug', `Equivalent dose (${table.unit})`, conflicts && 'Other sources', notes && 'Notes'].filter(Boolean).map((t) => h('th', { scope: 'col' }, t)))),
-        h('tbody', {}, drugs.map((d) => h('tr', { class: d.alt ? 'conflict' : '' },
-          h('td', {}, d.name),
-          h('td', {}, fmt(d.equiv)),
-          conflicts && h('td', {}, (d.alt ?? []).map((a) => `${SOURCES[a.src].label}: ${fmt(a.v)}${a.note ? ` (${a.note})` : ''}`).join('; ')),
-          notes && h('td', {}, d.detail ?? '')))))));
+        h('thead', {}, h('tr', {}, cols.map((t) => h('th', { scope: 'col' }, t)))),
+        h('tbody', {}, bodyRows))));
   }
 
   function statinTable() {
@@ -134,7 +164,7 @@ export function renderConvert(h, mount) {
   function insulinChart() {
     const W = 640;
     const H = 260;
-    const pad = { l: 40, r: 14, t: 14, b: 36 };
+    const pad = { l: 40, r: 14, t: 24, b: 36 };
     const hours = state.insulinHours;
     const x = (t) => pad.l + (t / hours) * (W - pad.l - pad.r);
     const y = (v) => H - pad.b - v * (H - pad.t - pad.b);
@@ -154,11 +184,36 @@ export function renderConvert(h, mount) {
     svg.append(el('line', { x1: pad.l, x2: W - pad.r, y1: H - pad.b, y2: H - pad.b, class: 'axis' }));
     svg.append(el('text', { x: (W + pad.l) / 2, y: H - 4, 'text-anchor': 'middle', class: 'tick' }, 'Hours after the dose'));
     svg.append(el('text', { x: 12, y: (H - pad.b + pad.t) / 2, 'text-anchor': 'middle', class: 'tick', transform: `rotate(-90 12 ${(H - pad.b + pad.t) / 2})` }, 'Activity'));
+    const labels = [];
     INSULINS.forEach((ins, i) => {
       if (!state.insulinShow.has(ins.id)) return;
       const pts = [];
-      for (let k = 0; k <= 400; k += 1) { const t = (k / 400) * hours; pts.push(`${x(t).toFixed(1)},${y(activity(t, ins)).toFixed(1)}`); }
+      let best = { t: 0, v: -1 };
+      let plateau = null;
+      for (let k = 0; k <= 400; k += 1) {
+        const t = (k / 400) * hours;
+        const v = activity(t, ins);
+        pts.push(`${x(t).toFixed(1)},${y(v).toFixed(1)}`);
+        if (v > best.v + 1e-6) best = { t, v };
+      }
+      for (let k = 0; k <= 400; k += 1) {
+        const t = (k / 400) * hours;
+        if (activity(t, ins) >= best.v * 0.98) plateau = plateau ? { a: plateau.a, b: t } : { a: t, b: t };
+      }
       svg.append(el('polyline', { points: pts.join(' '), class: `curve ins-${ins.kind}`, 'stroke-dasharray': ['', '7 4', '2 3'][i % 3] }));
+      // Label flat-topped curves at the middle of the plateau, others at the peak.
+      const tl = !ins.peak && plateau ? (plateau.a + plateau.b) / 2 : best.t;
+      labels.push({ name: ins.name.replace(/\s*\(.*\)$/, ''), kind: ins.kind, x: x(tl), y: y(activity(tl, ins)) });
+    });
+    // Place labels just above their curve, then nudge apart any that collide.
+    const placed = [];
+    labels.sort((a, b) => a.x - b.x).forEach((lb) => {
+      const wHalf = lb.name.length * 3.4 + 4;
+      let cx = Math.min(Math.max(lb.x, pad.l + wHalf), W - pad.r - wHalf);
+      let cy = Math.max(lb.y - 8, pad.t + 10);
+      while (placed.some((p) => Math.abs(p.x - cx) < p.w + wHalf && Math.abs(p.y - cy) < 14)) cy += 15;
+      placed.push({ x: cx, y: cy, w: wHalf });
+      svg.append(el('text', { x: cx, y: cy, 'text-anchor': 'middle', class: `lbl lbl-${lb.kind}` }, lb.name));
     });
     return svg;
   }
@@ -334,7 +389,7 @@ export function renderConvert(h, mount) {
     put(body, 
       h('p', { class: 'alert' }, 'Starting points only. Monitor glucose closely and use conservative doses in older adults.'),
       h('div', { class: 'pk-grid' },
-        select('ins-rule', 'Conversion', state.insulinRule, BASAL_RULES.map((r) => [r.id, r.label]), (v) => { state.insulinRule = v; calc(); }),
+        select('ins-rule', 'Conversion', state.insulinRule, BASAL_RULES.map((r) => [r.id, r.label]), (v) => { state.insulinRule = v; calc(); }, 'span-all'),
         input('ins-dose', 'Current total daily dose (units)', state.insulinDose, (v) => { state.insulinDose = v; calc(); })),
       out,
       ...footer(INSULIN_ITEM),

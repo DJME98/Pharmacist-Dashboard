@@ -115,10 +115,15 @@ test('score item point maximums', () => {
   assert.equal(max('childpugh'), 15);
   assert.equal(max('ciwa'), 67);
   assert.equal(max('cows'), 48);
+  assert.equal(max('fourts'), 8);
 });
 
 test('score interpretations', () => {
   const s = (id) => SCORES.find((x) => x.id === id);
+  assert.match(s('fourts').interp(3), /Low/);
+  assert.match(s('fourts').interp(4), /Intermediate/);
+  assert.match(s('fourts').interp(5), /Intermediate/);
+  assert.match(s('fourts').interp(6), /High/);
   assert.match(s('childpugh').interp(6), /Class A/);
   assert.match(s('childpugh').interp(7), /Class B/);
   assert.match(s('childpugh').interp(10), /Class C/);

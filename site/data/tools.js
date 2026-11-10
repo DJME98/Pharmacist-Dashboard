@@ -26,14 +26,14 @@ export const LAB_TOOLS = [
     fields: [{ key: 'ca', label: 'Measured calcium (mg/dL)', min: 1, max: 25 }, { key: 'albumin', label: 'Albumin (g/dL)', min: 0.5, max: 6 }],
     compute: (v) => [{ label: 'Corrected calcium', value: fix(l.correctedCalcium(v.ca, v.albumin)), unit: 'mg/dL' }],
     note: 'Calculation: calcium + 0.8 × (4 − albumin).',
-    refs: ['ucsfFormulas', 'wikemFormulas'], review: UNREVIEWED,
+    refs: ['ucsfFormulas'], review: UNREVIEWED,
   },
   {
     id: 'sodium', name: 'Sodium, glucose-corrected',
     fields: [{ key: 'na', label: 'Measured sodium (mEq/L)', min: 90, max: 200 }, { key: 'glucose', label: 'Glucose (mg/dL)', min: 10, max: 3000 }],
     compute: (v) => [{ label: 'Corrected sodium (Hillier)', value: fix(l.correctedSodium(v.na, v.glucose)), unit: 'mEq/L' }],
     note: 'Calculation: sodium + 0.024 × (glucose − 100).',
-    refs: ['ucsfFormulas', 'wikemFormulas'], review: UNREVIEWED,
+    refs: ['ucsfFormulas'], review: UNREVIEWED,
   },
   {
     id: 'water', name: 'Free water deficit',
@@ -46,8 +46,8 @@ export const LAB_TOOLS = [
       const d = l.freeWaterDeficit(v.kg, Number(v.fraction), v.na);
       return [{ label: 'Free water deficit', value: fix(d, 2), unit: 'L' }];
     },
-    note: 'WikEM lists 0.6, 0.5, 0.5, and 0.45. UCSF uses 0.5 for men and 0.4 for women. A negative result means sodium is below 140.',
-    refs: ['wikemFormulas', 'ucsfFormulas'], review: UNREVIEWED,
+    note: 'The MSD Manual uses 0.6 for men under 65 and children, 0.5 for men 65 and older and women 18 to 65, and 0.45 for women 65 and older. UCSF uses 0.5 for men and 0.4 for women. A negative result means sodium is below 140.',
+    refs: ['msdWater', 'ucsfFormulas'], review: UNREVIEWED,
   },
   {
     id: 'gap', name: 'Anion gap',
@@ -63,7 +63,7 @@ export const LAB_TOOLS = [
       ];
     },
     note: 'UCSF lists a normal anion gap of 10 to 14. Labs vary.',
-    refs: ['ucsfFormulas', 'wikemFormulas'], review: UNREVIEWED,
+    refs: ['ucsfFormulas'], review: UNREVIEWED,
   },
   {
     id: 'osm', name: 'Serum osmolality and osmolal gap',
@@ -181,7 +181,18 @@ export const SCORES = [
       { key: 'enc', label: 'Encephalopathy', options: [[1, 'None'], [2, 'Grade 1 to 2'], [3, 'Grade 3 to 4']] },
     ],
     interp: (t) => (t <= 6 ? 'Class A (5 to 6)' : t <= 9 ? 'Class B (7 to 9)' : 'Class C (10 to 15)'),
-    refs: ['pugh1973', 'wikemChild', 'vaChild'], review: UNREVIEWED,
+    refs: ['pugh1973', 'vaChild'], review: UNREVIEWED,
+  },
+  {
+    id: 'fourts', name: '4Ts (heparin-induced thrombocytopenia)',
+    items: [
+      { key: 'thromb', label: 'Thrombocytopenia', options: [[0, 'Fall under 30%, or nadir under 10'], [1, 'Fall 30% to 50%, or nadir 10 to 19'], [2, 'Fall over 50% and nadir 20 or higher']] },
+      { key: 'timing', label: 'Timing of the platelet fall', options: [[0, 'Within 4 days with no recent heparin'], [1, 'Likely days 5 to 10 but unclear, after day 10, or within 1 day with heparin 30 to 100 days ago'], [2, 'Clear onset on days 5 to 10, or within 1 day with heparin in the past 30 days']] },
+      { key: 'thrombosis', label: 'Thrombosis or other sequelae', options: [[0, 'None'], [1, 'Progressive or recurrent thrombosis, red skin lesions, or suspected but unproven thrombosis'], [2, 'New proven thrombosis, skin necrosis at injection sites, or acute reaction after IV heparin bolus']] },
+      { key: 'other', label: 'Other causes of thrombocytopenia', options: [[0, 'Definite'], [1, 'Possible'], [2, 'None apparent']] },
+    ],
+    interp: (t) => (t <= 3 ? 'Low probability (0 to 3). A low score has a high negative predictive value; HIT testing is usually not needed.' : t <= 5 ? 'Intermediate probability (4 to 5). Send HIT testing and consider stopping heparin.' : 'High probability (6 to 8). Stop heparin, start a non-heparin anticoagulant, and send HIT testing.'),
+    refs: ['lo2006', 'cuker2012'], review: UNREVIEWED,
   },
   {
     id: 'ciwa', name: 'CIWA-Ar',

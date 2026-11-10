@@ -30,7 +30,7 @@ For reference only. Use clinical judgment, and confirm doses against current ref
 
 - Critical care: status epilepticus, anaphylaxis, and drip rates
 - Labs: phenytoin, calcium, sodium, free water deficit, anion gap, osmolality, iron deficit, QTc, and MELD 3.0
-- Scores: CHA2DS2-VASc, HAS-BLED, Child-Pugh, CIWA-Ar, and COWS
+- Scores: CHA2DS2-VASc, HAS-BLED, Child-Pugh, 4Ts, CIWA-Ar, and COWS
 - Pediatrics: maintenance fluids
 - Anticoagulation dosing and reversal are not included yet
 
@@ -39,6 +39,7 @@ For reference only. Use clinical judgment, and confirm doses against current ref
 - ACLS and PALS: color-coded drug groups, Broselow color zones for PALS, and the published algorithm charts in a pop-up
 - Conversions: equivalence tables, a statin intensity table, and insulin action times with an overlay chart
 - Conversions round to practical doses and show where sources disagree; tables for opioids, benzodiazepines, and beta blockers
+- Conversions say where their numbers come from (the trials, pharmacology studies, or consensus behind them); benzodiazepines are grouped by half-life; steroids and ARBs show duration bars
 - ACLS and PALS: how each drug is given, shocks first in cardiac arrest, and weight ranges on the Broselow zones
 
 ## Publishing

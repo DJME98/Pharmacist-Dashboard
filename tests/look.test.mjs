@@ -61,3 +61,29 @@ test('no review labels remain on the site', () => {
     assert.ok(!/Unverified|awaiting pharmacist|Not yet reviewed/.test(text), f);
   }
 });
+
+test('ClinCalc and WikEM are not used as sources', () => {
+  const dir = new URL('../site/', import.meta.url);
+  const walk = (d) => readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(new URL(`${e.name}/`, d)) : [new URL(e.name, d)]));
+  for (const f of walk(dir).filter((u) => /\.(js|html)$/.test(u.pathname))) {
+    assert.doesNotMatch(readFileSync(f, 'utf8'), /clincalc|wikem/i, f.pathname);
+  }
+});
+
+test('every benzodiazepine sits in a duration group', () => {
+  const t = RATIO_TABLES.find((x) => x.id === 'benzo');
+  const ids = new Set(t.groups.map((g) => g.id));
+  for (const d of t.drugs) assert.ok(ids.has(d.group), d.id);
+});
+
+test('steroid and ARB rows carry durations', () => {
+  for (const id of ['steroid', 'arb']) {
+    const t = RATIO_TABLES.find((x) => x.id === id);
+    assert.ok(t.durationLabel);
+    for (const d of t.drugs.filter((x) => x.dur)) assert.ok(['short', 'mid', 'long'].includes(d.durClass) && d.dur[0] <= d.dur[1], d.id);
+  }
+});
+
+test('every conversion with a basis note cites its references', () => {
+  for (const t of RATIO_TABLES.filter((x) => x.basis)) for (const r of t.basisRefs) assert.ok(REFERENCES[r], r);
+});

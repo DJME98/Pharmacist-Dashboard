@@ -197,7 +197,7 @@ export const ALGORITHMS = [
     },
   },
   {
-    id: 'pals-arrest', kind: 'pals', name: 'Cardiac arrest', start: 'start', refs: ['ahaPalsCa', 'aha25Part8', 'wikemBroselow'], review: UNREVIEWED,
+    id: 'pals-arrest', kind: 'pals', name: 'Cardiac arrest', start: 'start', refs: ['ahaPalsCa', 'aha25Part8', 'zhu2022Broselow'], review: UNREVIEWED,
     steps: {
       start: { title: 'Start resuscitation', lines: ['Start CPR, give oxygen by bag-mask, attach monitor/defibrillator.', PEDS_CPR, PEDS_AIR], ask: 'What is the rhythm?', branches: [{ label: 'VF or pulseless VT', to: 's1' }, { label: 'Asystole or PEA', to: 'n1' }] },
       s1: { title: 'First shock', lines: ['Shock: {{p-shock:0}}.', 'CPR for 2 min. Get IV/IO access.'], ask: 'Rhythm check', branches: SHOCKABLE('s2', 'n2') },

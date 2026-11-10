@@ -40,7 +40,7 @@ export function salazarCorcoran(age, kg, cm, scr, sex) {
     : ((137 - age) * (0.285 * kg + 12.1 * m ** 2)) / (51 * scr);
 }
 
-// Jelliffe, ClinCalc variant: V = 0.6 L/kg. Result in mL/min.
+// Jelliffe with V = 0.6 L/kg. Result in mL/min.
 // Weight is the lesser of ideal and actual body weight (chosen by the caller).
 export function jelliffe(age, weight, scrEarlier, scrLatest, days, sex) {
   const production = isFemale(sex) ? weight * (25.3 - 0.175 * age) : weight * (29.3 - 0.203 * age);

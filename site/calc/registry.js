@@ -86,8 +86,8 @@ export const CALCULATIONS = [
       };
     },
     formula: (p) => `Production = weight × ${p.sex === 'F' ? '(25.3 − 0.175 × age)' : '(29.3 − 0.203 × age)'}; V = 0.6 L/kg × weight; CrCl = (Production − V × 10 × (SCr latest − SCr earlier) ÷ days) × 100 ÷ (SCr used × 1440)`,
-    note: 'Follows the ClinCalc variant: V of 0.6 L/kg, the lesser of ideal and actual weight, latest SCr if rising, and average SCr if falling. Other published versions use different coefficients. Less accurate while renal function is improving.',
-    refs: ['clincalcCrcl', 'jelliffe2002', 'jelliffe1972', 'rxkRenal', 'gfrAkiModelling'],
+    note: 'Uses V of 0.6 L/kg, the lesser of ideal and actual weight, latest SCr if rising, and average SCr if falling. Other published versions use different coefficients. Less accurate while renal function is improving.',
+    refs: ['jelliffe2002', 'jelliffe1972', 'rxkRenal', 'gfrAkiModelling'],
     review: UNREVIEWED,
   },
   {
@@ -265,7 +265,7 @@ export const CALCULATIONS = [
     compute: (p) => ({ value: ibwOf(p) }),
     formula: (p) => `${p.sex === 'F' ? '45.5' : '50'} + 2.3 × (height in inches − 60)`,
     note: 'Pai 2000 traces this equation and notes its limited scientific basis.',
-    refs: ['devine1974', 'pai2000', 'clincalcIbw'],
+    refs: ['devine1974', 'pai2000'],
     review: UNREVIEWED,
   },
   {
