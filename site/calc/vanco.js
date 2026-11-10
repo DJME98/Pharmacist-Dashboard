@@ -168,8 +168,12 @@ export function buildHistory({ loadMg, doseMg, tau, hours, count, hoursAfterLast
 }
 
 export const TARGET = [400, 600];
+// Doses come in 250 mg steps from 500 mg, with a 2000 mg maximum per dose.
+export const DOSE_RULE = { min: 500, step: 250, max: 2000 };
+export const roundVancoDose = (mg) => Math.min(DOSE_RULE.max, Math.max(DOSE_RULE.min, Math.round(mg / DOSE_RULE.step) * DOSE_RULE.step));
+export const isAllowedDose = (mg) => mg >= DOSE_RULE.min && mg <= DOSE_RULE.max && mg % DOSE_RULE.step === 0;
 const DOSES = [];
-for (let mg = 500; mg <= 3000; mg += 250) DOSES.push(mg);
+for (let mg = DOSE_RULE.min; mg <= DOSE_RULE.max; mg += DOSE_RULE.step) DOSES.push(mg);
 const INTERVALS = [8, 12, 24, 36, 48];
 
 // Regimens predicted to land in the AUC target, closest to its midpoint first.
@@ -190,7 +194,7 @@ export function regimenOptions(m, hoursFor = (mg) => Math.max(1, mg / 1000), lim
 
 export function loadingRange(kg, bmi) {
   const [lo, hi] = bmi >= 30 ? [20, 25] : [20, 35];
-  return { perKg: [lo, hi], mg: [Math.min(lo * kg, 3000), Math.min(hi * kg, 3000)], capped: hi * kg > 3000 };
+  return { perKg: [lo, hi], mg: [roundVancoDose(lo * kg), roundVancoDose(hi * kg)], capped: hi * kg > DOSE_RULE.max + DOSE_RULE.step / 2 };
 }
 
 export function populationWarnings(p, crclInfo) {

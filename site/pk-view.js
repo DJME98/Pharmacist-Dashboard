@@ -2,15 +2,14 @@ import { put } from './dom.js';
 import { bmi } from './calc/formulas.js';
 import {
   MODEL, TARGET, buildHistory, concentrationAt, crclForModel, fitOneLevel, individualParams,
-  loadingRange, populationWarnings, regimenOptions, steadyState, typicalParams,
+  loadingRange, populationWarnings, regimenOptions, steadyState, typicalParams, DOSE_RULE, isAllowedDose,
 } from './calc/vanco.js';
-import { DRUGS, extendedDose, patientKinetics, targetsFor, traditionalRegimen } from './calc/amino.js';
-import { PK_ITEMS } from './data/pk.js';
+import { patientKinetics } from './calc/amino.js';
+import { PK_ITEMS, NOMOGRAMS, NOMOGRAM_RULES, NOMOGRAM_EXCLUSIONS, NOMOGRAM_DOSES } from './data/pk.js';
 import { REFERENCES } from './data/references.js';
 
 // Dose history is held only in these objects and is never stored or sent.
 const vanco = { load: '', dose: '', tau: '', hours: '1', count: '1', after: '', level: '', weightChoice: 'ibw', dialysis: false };
-const amino = { drug: 'gent', indication: 'serious', peak: '', trough: '', tinf: '0.5' };
 
 const num = (t) => {
   const s = String(t ?? '').trim();
@@ -73,6 +72,8 @@ function checkVanco(s) {
   if (bad(v.after, 0.1, 120)) errors.push('Hours after the last dose must be 0.1 to 120.');
   if (bad(v.level, 0.5, 200)) errors.push('Level must be 0.5 to 200 mg/L.');
   if (v.tau && v.hours && v.hours >= v.tau) errors.push('Infusion time must be shorter than the interval.');
+  const offStep = [v.load, v.dose].filter((x) => x !== null && !Number.isNaN(x) && !isAllowedDose(x));
+  if (offStep.length) warnings.push(`Doses are given in ${DOSE_RULE.step} mg steps from ${DOSE_RULE.min} to ${DOSE_RULE.max} mg. ${offStep.map((x) => `${x} mg`).join(' and ')} is outside that.`);
   const regimen = v.dose !== null && v.tau !== null && v.hours !== null && errors.length === 0;
   const levelEntered = v.level !== null || v.after !== null;
   const canFit = regimen && v.level !== null && v.after !== null && v.count !== null;
@@ -191,8 +192,8 @@ export function renderVanco(h, mount) {
           : h('p', {}, 'No listed regimen reaches the target. Consider a different interval or dose by level.')),
       h('section', { class: 'group' },
         h('h2', {}, 'Loading dose'),
-        h('p', {}, `${round(load.mg[0], 0)} to ${round(load.mg[1], 0)} mg (${load.perKg[0]} to ${load.perKg[1]} mg/kg actual weight${load.capped ? ', capped at 3000 mg' : ''}).`),
-        h('p', { class: 'hint' }, 'May be considered in critically ill patients. BMI 30 or above uses 20 to 25 mg/kg.'),
+        h('p', {}, `${round(load.mg[0], 0)} to ${round(load.mg[1], 0)} mg (${load.perKg[0]} to ${load.perKg[1]} mg/kg actual weight, rounded to ${DOSE_RULE.step} mg${load.capped ? `, capped at ${DOSE_RULE.max} mg` : ''}).`),
+        h('p', { class: 'hint' }, `May be considered in critically ill patients. BMI 30 or above uses 20 to 25 mg/kg. Every dose here is limited to ${DOSE_RULE.min} to ${DOSE_RULE.max} mg in ${DOSE_RULE.step} mg steps; the guideline itself allows loading doses up to 3000 mg.`),
         ...item(h, 'vanco-load')),
       h('section', { class: 'group' },
         h('h2', {}, 'About this estimate'),
@@ -206,76 +207,54 @@ export function renderVanco(h, mount) {
 }
 
 export function renderAmino(h, mount) {
-  const form = h('div', { class: 'pk-form' });
-  const output = h('div', { class: 'pk-output' });
+  const side = h('div', { class: 'nomo-side' });
+  const main = h('div', {});
+  put(mount, side, main);
   let patient = null;
-  const change = () => draw();
 
-  form.append(h('div', { class: 'pk-grid' },
-    selectField(h, amino, 'drug', 'Drug', Object.entries(DRUGS).map(([k, d]) => [k, d.name]), change),
-    selectField(h, amino, 'indication', 'Infection', [['life', 'Life-threatening'], ['serious', 'Serious'], ['uti', 'UTI']], change),
-    textField(h, amino, 'peak', 'Goal peak, mcg/mL (optional)', change),
-    textField(h, amino, 'trough', 'Goal trough, mcg/mL (optional)', change),
-    textField(h, amino, 'tinf', 'Infusion time, hours', change)));
-
-  put(mount, form, output);
+  function drawSide(k) {
+    if (!k) {
+      put(side, h('p', { class: 'empty' }, 'Enter age, sex, height, weight, and SCr to see CrCl, dosing weight, and doses in mg.'));
+      return;
+    }
+    put(side,
+      h('div', { class: 'stats' },
+        stat(h, 'CrCl (Cockcroft-Gault)', round(k.crcl, 0), 'mL/min'),
+        stat(h, `Dosing weight (${k.weight.basis})`, round(k.weight.kg, 1), 'kg')),
+      h('div', { class: 'scroll' }, h('table', { class: 'data' },
+        h('thead', {}, h('tr', {}, ['Drug', 'mg/kg', 'Dose'].map((t) => h('th', { scope: 'col' }, t)))),
+        h('tbody', {}, NOMOGRAM_DOSES.flatMap((d) => d.perKg.map((pk) => h('tr', {},
+          h('td', {}, d.drug), h('td', {}, `${pk}`), h('td', {}, `${round(Math.round((pk * k.weight.kg) / d.round) * d.round)} mg`))))))),
+      h('p', { class: 'hint' }, 'Dosing weight: actual if under ideal, ideal up to 120% of ideal, then adjusted (ideal + 0.4 × excess). Gentamicin and tobramycin round to 10 mg, amikacin to 50 mg. The highlighted rows below match this CrCl.'));
+  }
 
   function draw() {
     const p = patient;
-    if (!p || p.ageY === null || p.sex === null || p.heightCm === null || p.weightKg === null || p.scr === null) {
-      put(output, h('p', { class: 'empty' }, 'Enter age, sex, height, weight, and SCr to see an estimate.'));
-      return;
-    }
-    if (p.ageY < 18) {
-      put(output, h('p', { class: 'empty' }, 'This calculator is for adults.'));
-      return;
-    }
-    const tinf = num(amino.tinf);
-    const defaults = targetsFor(amino.drug, amino.indication);
-    const peak = num(amino.peak) ?? defaults.peak;
-    const trough = num(amino.trough) ?? defaults.trough;
-    if (![tinf, peak, trough].every((x) => x !== null && Number.isFinite(x) && x > 0) || trough >= peak || tinf >= 12) {
-      put(output, h('p', { class: 'alert stop' }, 'Enter a positive infusion time under 12 hours and a goal peak above the goal trough.'));
-      return;
-    }
-    const k = patientKinetics(p, amino.drug);
-    const t = traditionalRegimen(k, amino.drug, peak, trough, tinf);
-    const e = extendedDose(k, amino.drug);
-    const drugName = DRUGS[amino.drug].name;
-
-    put(output, 
-      h('div', { class: 'stats' },
-        stat(h, `Dosing weight (${k.weight.basis})`, round(k.weight.kg, 1), 'kg'),
-        stat(h, 'CrCl', round(k.crcl, 0), 'mL/min'),
-        stat(h, 'Kel', round(k.kel, 3), '1/h'),
-        stat(h, 'Half-life', round(k.halfLife, 1), 'h'),
-        stat(h, 'Vd', round(k.vd, 1), 'L')),
+    const ready = p && p.ageY !== null && p.ageY >= 18 && p.sex !== null && p.heightCm !== null && p.weightKg !== null && p.scr !== null;
+    const k = ready ? patientKinetics(p, 'gent') : null;
+    drawSide(k);
+    put(main,
+      h('p', {}, 'Extended-interval dosing by nomogram. Pick the dose, choose the interval from CrCl, draw one level, and plot it on the matching nomogram.'),
+      h('p', { class: 'alert' }, NOMOGRAM_EXCLUSIONS),
+      NOMOGRAMS.map((n) => h('section', { class: 'group nomo' },
+        h('h2', {}, n.name),
+        h('p', { class: 'basis-line' }, n.dose),
+        h('div', { class: 'scroll' }, h('table', { class: 'data' },
+          h('thead', {}, h('tr', {}, ['CrCl (mL/min)', 'Gentamicin or tobramycin', 'Amikacin'].map((t) => h('th', { scope: 'col' }, t)))),
+          h('tbody', {}, n.rows.map((r, i) => {
+            const hi = i === 0 ? Infinity : n.rows[i - 1][3];
+            const match = k && k.crcl >= r[3] && k.crcl < hi;
+            return h('tr', { class: match ? 'match' : '' }, h('td', {}, r[0]), h('td', {}, r[1]), h('td', {}, r[2]));
+          })))),
+        h('ul', { class: 'plain' }, h('li', {}, h('b', {}, 'Level: '), n.level), h('li', {}, h('b', {}, 'Plotting: '), n.plot), n.notes.map((t) => h('li', {}, t))))),
       h('section', { class: 'group' },
-        h('h2', {}, 'Traditional dosing'),
-        t.tau === null
-          ? h('p', {}, 'The interval needed is longer than 48 hours. Dose by level.')
-          : h('div', { class: 'pk-hero' },
-              h('p', { class: 'hero-value' }, `${round(t.mg)} mg`, h('span', { class: 'unit' }, `every ${t.tau} h`)),
-              h('p', {}, `Expected peak ${round(t.peak, 1)} and trough ${round(t.trough, 1)} mcg/mL`)),
-        h('p', { class: 'hint' }, `Goals used: peak ${round(peak, 1)}, trough ${round(trough, 1)} mcg/mL. Exact calculation: ${round(t.idealDose)} mg every ${round(t.idealTau, 1)} h. Usual peak range for this infection: ${defaults.range[0]} to ${defaults.range[1]}.`),
-        ...item(h, 'ag-traditional')),
-      h('section', { class: 'group' },
-        h('h2', {}, 'Extended-interval dosing (Hartford)'),
-        e.tau === null
-          ? h('p', { class: 'alert' }, 'Not recommended with CrCl below 20 mL/min. Use traditional dosing by level.')
-          : h('div', { class: 'pk-hero' },
-              h('p', { class: 'hero-value' }, `${round(e.mg)} mg`, h('span', { class: 'unit' }, `every ${e.tau} h`)),
-              h('p', {}, `${drugName} ${e.perKg} mg/kg, based on ${round(k.weight.kg, 1)} kg`)),
-        k.crcl >= 20 && k.crcl < 30 && h('p', { class: 'alert' }, 'Sources differ at CrCl 20 to 29 mL/min: some list every 48 h, and Stanford does not recommend extended-interval dosing here.'),
-        h('ul', { class: 'plain' },
-          h('li', {}, 'Draw one level 6 to 14 hours after the start of the first infusion and plot it on the published nomogram.'),
-          amino.drug === 'amik' && h('li', {}, 'Divide the amikacin level by 2 before plotting.'),
-          h('li', {}, 'On a line, choose the longer interval. Above the q48h zone, switch to traditional dosing.'),
-          h('li', {}, 'This app does not read the nomogram automatically: its numeric cut-points could not be confirmed from a readable source.')),
-        h('p', { class: 'hint' }, 'Avoid in pediatrics, dialysis, cystic fibrosis, burns over 20% BSA, significant ascites, pregnancy, and enterococcal endocarditis or gram-positive synergy.'),
+        h('h2', {}, 'Reading the nomogram'),
+        h('ul', { class: 'plain' }, NOMOGRAM_RULES.map((t) => h('li', {}, t))),
+        h('p', {}, h('a', { href: 'https://med.stanford.edu/content/dam/sm/bugsanddrugs/documents/antimicrobial-dosing-protocols/SHC-Aminoglycoside-Dosing-Guide.pdf', target: '_blank', rel: 'noopener' }, 'Open the Hartford and Urban-Craig nomogram graphs (Stanford guide, Appendix A)')),
+        h('p', { class: 'hint' }, 'The graphs are linked rather than redrawn: their exact line positions are not published in a form that could be checked.'),
         ...item(h, 'ag-extended')),
     );
   }
 
-  return (p) => { patient = p; draw(); };
+  return (pt) => { patient = pt; draw(); };
 }

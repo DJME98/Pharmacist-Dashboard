@@ -75,8 +75,17 @@ test('regimen options all fall inside the target', () => {
 });
 
 test('loading dose ranges and cap', () => {
-  assert.deepEqual(v.loadingRange(80, 25), { perKg: [20, 35], mg: [1600, 2800], capped: false });
-  assert.deepEqual(v.loadingRange(150, 40), { perKg: [20, 25], mg: [3000, 3000], capped: true });
+  assert.deepEqual(v.loadingRange(80, 25), { perKg: [20, 35], mg: [1500, 2000], capped: true });
+  assert.deepEqual(v.loadingRange(150, 40), { perKg: [20, 25], mg: [2000, 2000], capped: true });
+  assert.deepEqual(v.loadingRange(50, 22), { perKg: [20, 35], mg: [1000, 1750], capped: false });
+});
+
+test('vancomycin doses use 250 mg steps from 500 to 2000 mg', () => {
+  assert.equal(v.roundVancoDose(1130), 1250);
+  assert.equal(v.roundVancoDose(300), 500);
+  assert.equal(v.roundVancoDose(2600), 2000);
+  assert.ok(v.isAllowedDose(1750) && !v.isAllowedDose(1800) && !v.isAllowedDose(2250));
+  for (const o of v.regimenOptions(v.typicalParams(80, 120))) assert.ok(v.isAllowedDose(o.mg), String(o.mg));
 });
 
 // Expected numbers were worked by hand from the published equations.

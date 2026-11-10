@@ -346,3 +346,8 @@ table.data tr.group-row th { text-align: left; font-size: .85rem; text-transform
 .ins-chart .lbl { font-size: 12px; font-weight: 700; font-family: inherit; paint-order: stroke; stroke: var(--ground); stroke-width: 4px; stroke-linejoin: round; }
 .lbl-ultra { fill: var(--ins-ultra); } .lbl-inhaled { fill: var(--ins-inhaled); } .lbl-rapid { fill: var(--ins-rapid); }
 .lbl-short { fill: var(--ins-short); } .lbl-intermediate { fill: var(--ins-intermediate); } .lbl-long { fill: var(--ins-long); }
+
+/* Aminoglycoside nomograms */
+.nomo-side { margin-bottom: 12px; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+table.data tr.match td { background: color-mix(in srgb, var(--plum-ink) 16%, transparent); font-weight: 700; }
+table.data tr.match td:first-child { box-shadow: inset 4px 0 0 var(--plum-ink); }
