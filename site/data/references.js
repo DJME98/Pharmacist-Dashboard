@@ -140,6 +140,8 @@ export const REFERENCES = {
   harvey2023: { cite: 'Harvey EJ, Hand K, Weston D, Ashiru-Oredope D. Development of national antimicrobial intravenous-to-oral switch criteria and decision aid. J Clin Med. 2023;12(6):2086.', url: 'https://doi.org/10.3390/jcm12062086', checked: 'citation', note: 'UK national IV-to-oral switch criteria.' },
   ciproLabel: { cite: 'Cipro (ciprofloxacin) tablets and IV. US prescribing information. Bayer.', url: null, checked: 'citation', note: 'Equivalent oral and IV regimens.' },
   fluconazoleLabel: { cite: 'Diflucan (fluconazole) US prescribing information. Pfizer.', url: null, checked: 'citation', note: 'Same daily dose orally and IV.' },
+  bystolicLabel: { cite: 'Bystolic (nebivolol) tablets. US prescribing information, section 12.1.', url: 'https://drugcentral.org/label/07ed02ff-523f-437e-bddc-5c41a4bb0062/view', checked: 'primary', note: 'Preferentially beta-1 selective at 10 mg or less; vasodilation listed as a possible mechanism; no ISA.' },
+  sotalolLabel: { cite: 'Betapace and Betapace AF (sotalol hydrochloride) tablets. US prescribing information; effective 6/2023.', url: 'https://medthority.com/fda/b/betapace/betapace-sotalol-hydrochloride-80-mg1-covis-pharma-us-inc2', checked: 'primary', note: 'Class II and Class III antiarrhythmic; boxed warning on initiation with continuous ECG monitoring and CrCl-based dosing.' },
 };
 
 export const REFERENCES_ACCESSED = ACCESSED;

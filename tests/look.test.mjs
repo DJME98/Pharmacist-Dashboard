@@ -87,3 +87,14 @@ test('steroid and ARB rows carry durations', () => {
 test('every conversion with a basis note cites its references', () => {
   for (const t of RATIO_TABLES.filter((x) => x.basis)) for (const r of t.basisRefs) assert.ok(REFERENCES[r], r);
 });
+
+test('beta blockers are grouped and sotalol is not convertible', () => {
+  const t = RATIO_TABLES.find((x) => x.id === 'beta');
+  const ids = new Set(t.groups.map((g) => g.id));
+  for (const d of t.drugs) assert.ok(ids.has(d.group), d.id);
+  const sel = t.drugs.filter((d) => d.group === 'sel').map((d) => d.id);
+  assert.deepEqual(sel.sort(), ['atenolol', 'betaxolol', 'bisoprolol', 'metoprolol', 'metoprolol-er']);
+  const sotalol = t.drugs.find((d) => d.id === 'sotalol');
+  assert.ok(sotalol.noConvert && !sotalol.equiv);
+  for (const d of t.drugs.filter((x) => x.group === 'other')) assert.ok(d.detail && d.detail.length > 10, d.id);
+});

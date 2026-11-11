@@ -70,9 +70,10 @@ export function renderConvert(h, mount) {
   function drawRatio(table) {
     const s = state.ratio[table.id];
     const out = h('div', { class: 'conv-out' });
-    const drugs = table.methods
+    const all = table.methods
       ? table.drugs.filter((d) => d.equivs[s.method] !== undefined).map((d) => ({ ...d, equiv: d.equivs[s.method] }))
       : table.drugs;
+    const drugs = all.filter((d) => !d.noConvert);
     if (!drugs.some((d) => d.id === s.from)) s.from = drugs[0].id;
     const calc = () => {
       const dose = num(s.dose);
@@ -102,7 +103,7 @@ export function renderConvert(h, mount) {
           : drugs.map((d) => [d.id, d.name]), (v) => { s.from = v; calc(); }),
         input('dose', `Dose (${table.unit})`, s.dose, (v) => { s.dose = v; calc(); })),
       out,
-      table.table && equivalenceTable(table, drugs),
+      table.table && equivalenceTable(table, all),
       ...footer(table));
     calc();
   }
@@ -131,7 +132,7 @@ export function renderConvert(h, mount) {
     const cols = ['Drug', `Equivalent dose (${table.unit})`, durations && table.durationLabel, conflicts && 'Other sources', notes && 'Notes'].filter(Boolean);
     const row = (d) => h('tr', { class: d.alt ? 'conflict' : '' },
       h('td', {}, d.name),
-      h('td', {}, fmt(d.equiv)),
+      h('td', {}, d.noConvert ? h('b', {}, d.noConvert) : fmt(d.equiv)),
       durations && h('td', {}, durationBar(d, maxH, table.durScale === 'log')),
       conflicts && h('td', {}, (d.alt ?? []).map((a) => `${SOURCES[a.src].label}: ${fmt(a.v)}${a.note ? ` (${a.note})` : ''}`).join('; ')),
       notes && h('td', {}, d.detail ?? ''));
