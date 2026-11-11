@@ -54,17 +54,16 @@ test('PALS adenosine caps', () => {
 });
 
 test('other PALS caps and ranges', () => {
-  assert.equal(peds('p-calcium', 'Dose', 10).dose, '200 mg');
-  assert.equal(peds('p-calcium', 'Dose', 150).dose, '2000 mg');
-  assert.equal(peds('p-calcium', 'Volume', 150).dose, '20 mL');
-  assert.equal(peds('p-mag', 'Dose', 10).dose, '250 to 500 mg');
-  assert.equal(peds('p-mag', 'Dose', 60).dose, '1500 to 2000 mg');
-  assert.equal(peds('p-mag', 'Dose', 60).flag, 'max');
-  assert.equal(peds('p-mag', 'Dose', 100).dose, '2000 mg');
-  assert.equal(peds('p-epi-et', 'Dose', 40).dose, '2.5 mg');
-  assert.equal(peds('p-naloxone', 'Under 20 kg and under 5 y', 10).dose, '1 mg');
-  assert.equal(peds('p-glucose', 'D25W, infants and children', 10).dose, '20 to 40 mL');
-  assert.equal(peds('p-epi-inf', 'Rate', 10).dose, '1 to 10 mcg/min');
+  assert.equal(peds('p-naloxone', 'Dose', 10).dose, '1 mg');
+  assert.equal(peds('p-naloxone', 'Dose', 40).dose, '2 mg');
+  assert.equal(peds('p-lido', 'Repeat dose', 20).dose, '10 mg');
+  assert.equal(peds('p-lido-inf', 'Rate', 10).dose, '200 to 500 mcg/min');
+});
+
+test('PALS doses without a primary source were removed', () => {
+  for (const id of ['p-epi-et', 'p-amio-vt', 'p-procainamide', 'p-calcium', 'p-calcium-gluc', 'p-bicarb', 'p-glucose', 'p-mag', 'p-epi-inf', 'p-norepi', 'p-dopamine', 'p-dobutamine']) {
+    assert.ok(!PEDS_DOSES.some((d) => d.id === id), id);
+  }
 });
 
 test('adult weight-based drugs need a weight and flat drugs do not', () => {

@@ -16,38 +16,38 @@ export const LAB_TOOLS = [
     ],
     compute: (v) => [
       { label: 'Sheiner-Tozer, 0.2 coefficient', value: fix(l.phenytoinCorrected(v.level, v.albumin, v.renal === 'yes' ? 0.1 : 0.2)), unit: 'mcg/mL' },
-      { label: 'Alternative, 0.275 coefficient', value: fix(l.phenytoinCorrected(v.level, v.albumin, v.renal === 'yes' ? 0.2 : 0.275)), unit: 'mcg/mL' },
+      ...(v.renal === 'yes' ? [] : [{ label: 'Anderson 1997, 0.275 coefficient', value: fix(l.phenytoinCorrected(v.level, v.albumin, 0.275)), unit: 'mcg/mL' }]),
     ],
-    note: 'Sources disagree: some use 0.2 (0.1 in renal failure), and MDCalc uses 0.275 (0.2 in renal failure, CrCl under 20). Less accurate with drugs that displace phenytoin, such as valproate. A free level is more reliable.',
-    refs: ['cliotPhenytoin', 'mdcalcPhenytoin', 'evansPhenytoin'], review: UNREVIEWED,
+    note: 'Sheiner-Tozer uses 0.2, or 0.1 in renal failure (Liponi 1984). Anderson 1997 found 0.275 more accurate in trauma and older patients with low albumin; it was not studied in renal failure. Less accurate with drugs that displace phenytoin, such as valproate. A free level is more reliable.',
+    refs: ['sheinerTozer1978', 'liponi1984', 'anderson1997'], review: UNREVIEWED,
   },
   {
     id: 'calcium', name: 'Calcium, albumin-corrected',
     fields: [{ key: 'ca', label: 'Measured calcium (mg/dL)', min: 1, max: 25 }, { key: 'albumin', label: 'Albumin (g/dL)', min: 0.5, max: 6 }],
     compute: (v) => [{ label: 'Corrected calcium', value: fix(l.correctedCalcium(v.ca, v.albumin)), unit: 'mg/dL' }],
-    note: 'Calculation: calcium + 0.8 × (4 − albumin).',
-    refs: ['ucsfFormulas'], review: UNREVIEWED,
+    note: 'Calculation: calcium + 0.8 × (4 − albumin), the Payne 1973 adjustment converted to mg/dL and g/dL.',
+    refs: ['payne1973'], review: UNREVIEWED,
   },
   {
     id: 'sodium', name: 'Sodium, glucose-corrected',
     fields: [{ key: 'na', label: 'Measured sodium (mEq/L)', min: 90, max: 200 }, { key: 'glucose', label: 'Glucose (mg/dL)', min: 10, max: 3000 }],
     compute: (v) => [{ label: 'Corrected sodium (Hillier)', value: fix(l.correctedSodium(v.na, v.glucose)), unit: 'mEq/L' }],
-    note: 'Calculation: sodium + 0.024 × (glucose − 100).',
-    refs: ['ucsfFormulas'], review: UNREVIEWED,
+    note: 'Calculation: sodium + 0.024 × (glucose − 100). Hillier 1999 measured 2.4 mEq/L per 100 mg/dL; the older Katz factor is 1.6.',
+    refs: ['hillier1999'], review: UNREVIEWED,
   },
   {
     id: 'water', name: 'Free water deficit',
     fields: [
       { key: 'kg', label: 'Weight (kg)', min: 1, max: 400 },
       { key: 'na', label: 'Sodium (mEq/L)', min: 120, max: 200 },
-      { key: 'fraction', label: 'Total body water fraction', options: [['0.6', 'Adult male or child, 0.6'], ['0.5', 'Adult female or older male, 0.5'], ['0.45', 'Older female, 0.45'], ['0.4', 'Lower UCSF female value, 0.4']] },
+      { key: 'fraction', label: 'Total body water fraction', options: [['0.6', 'Adult male or child, 0.6'], ['0.5', 'Adult female or older male, 0.5'], ['0.45', 'Older female, 0.45']] },
     ],
     compute: (v) => {
       const d = l.freeWaterDeficit(v.kg, Number(v.fraction), v.na);
       return [{ label: 'Free water deficit', value: fix(d, 2), unit: 'L' }];
     },
-    note: 'The MSD Manual uses 0.6 for men under 65 and children, 0.5 for men 65 and older and women 18 to 65, and 0.45 for women 65 and older. UCSF uses 0.5 for men and 0.4 for women. A negative result means sodium is below 140.',
-    refs: ['msdWater', 'ucsfFormulas'], review: UNREVIEWED,
+    note: 'Deficit = total body water × (Na ÷ 140 − 1). Total body water fractions: 0.6 for children and men, 0.5 for women and older men, 0.45 for older women (Adrogué and Madias 2000). A negative result means sodium is below 140.',
+    refs: ['adrogue2000'], review: UNREVIEWED,
   },
   {
     id: 'gap', name: 'Anion gap',
@@ -62,8 +62,8 @@ export const LAB_TOOLS = [
         ...(v.albumin !== null ? [{ label: 'Albumin-corrected', value: fix(l.correctedAnionGap(g, v.albumin)), unit: 'mEq/L' }] : []),
       ];
     },
-    note: 'UCSF lists a normal anion gap of 10 to 14. Labs vary.',
-    refs: ['ucsfFormulas'], review: UNREVIEWED,
+    note: 'Albumin correction: add 2.5 for each 1 g/dL that albumin is below 4 (Figge 1998). Reference ranges depend on the analyzer; use your lab’s range.',
+    refs: ['emmett1977', 'figge1998', 'kraut2007'], review: UNREVIEWED,
   },
   {
     id: 'osm', name: 'Serum osmolality and osmolal gap',
@@ -79,8 +79,8 @@ export const LAB_TOOLS = [
         ...(v.measured !== null ? [{ label: 'Osmolal gap', value: fix(v.measured - c), unit: 'mOsm/kg' }] : []),
       ];
     },
-    note: 'Calculation: 2 × Na + glucose ÷ 18 + BUN ÷ 2.8 + ethanol ÷ 4.6. A gap over 10 is abnormal.',
-    refs: ['ucsfFormulas'], review: UNREVIEWED,
+    note: 'Calculation: 2 × Na + glucose ÷ 18 + BUN ÷ 2.8 + ethanol ÷ 4.6 (molecular weights). Purssell 2001 measured a larger ethanol effect, ethanol ÷ 3.7. A gap over 10 is commonly treated as abnormal.',
+    refs: ['smithline1976', 'purssell2001'], review: UNREVIEWED,
   },
   {
     id: 'iron', name: 'Iron deficit (Ganzoni)',
@@ -90,7 +90,7 @@ export const LAB_TOOLS = [
     ],
     compute: (v) => [{ label: 'Total iron deficit', value: fix(l.ganzoni(v.kg, v.target, v.hb, v.stores ?? 500), 0), unit: 'mg' }],
     note: 'Calculation: weight × (target − current Hb) × 2.4 + stores. Smaller patients may need lower stores, such as 15 mg/kg under 35 kg. The source does not say which weight to use.',
-    refs: ['cliotGanzoni'], review: UNREVIEWED,
+    refs: ['ganzoni1970'], review: UNREVIEWED,
   },
   {
     id: 'qtc', name: 'QTc',
@@ -105,7 +105,7 @@ export const LAB_TOOLS = [
       ];
     },
     note: 'Bazett overcorrects at high heart rates and undercorrects at low ones. It works best between 50 and 70 bpm.',
-    refs: ['qtReview'], review: UNREVIEWED,
+    refs: ['bazett1920', 'fridericia1920', 'sagie1992', 'hodges1983', 'qtReview'], review: UNREVIEWED,
   },
   {
     id: 'meld', name: 'MELD 3.0',
@@ -118,7 +118,7 @@ export const LAB_TOOLS = [
     ],
     compute: (v) => [{ label: 'MELD 3.0', value: String(l.meld3({ ...v, female: v.sex === 'F', dialysis: v.dialysis === 'yes' })), unit: '' }],
     note: 'Values are bounded as published: bilirubin, creatinine, and INR at least 1; creatinine at most 3; sodium 125 to 137; albumin 1.5 to 3.5. Use a version without albumin if IV albumin was given recently.',
-    refs: ['kim2021', 'msdMeld', 'meldReview'], review: UNREVIEWED,
+    refs: ['kim2021'], review: UNREVIEWED,
   },
 ];
 
@@ -133,8 +133,8 @@ export const PEDS_TOOLS = [
         { label: 'Daily volume, before hourly cap', value: fix(m.daily, 0), unit: 'mL/day' },
       ];
     },
-    note: 'Use the dose-calculation or ideal weight. Isotonic fluid at 28 days or older, plus dextrose if intake is limited. Replace ongoing losses separately.',
-    refs: ['ucsfMivf', 'feld2018'], review: UNREVIEWED,
+    note: 'Holliday and Segar 1957: 100 mL/kg/day for the first 10 kg, 50 for the next 10, 20 for each kg above 20 (4-2-1 mL/kg/h). The hourly rate here stops at 120 mL/h, a common practice cap with no source in these papers. AAP 2018: isotonic fluid with appropriate KCl and dextrose from 28 days to 18 years. Replace ongoing losses separately.',
+    refs: ['holliday1957', 'feld2018'], review: UNREVIEWED,
   },
 ];
 
@@ -153,7 +153,7 @@ export const SCORES = [
       { key: 'female', label: 'Female sex', points: 1 },
     ],
     interp: () => 'This app does not give anticoagulation recommendations yet.',
-    refs: ['casraiChads'], review: UNREVIEWED,
+    refs: ['lip2010'], review: UNREVIEWED,
   },
   {
     id: 'hasbled', name: 'HAS-BLED',
@@ -169,7 +169,7 @@ export const SCORES = [
       { key: 'a', label: 'Alcohol, 8 or more drinks a week', points: 1 },
     ],
     interp: (t) => (t >= 3 ? 'High risk. Review modifiable factors and monitor closely. It does not by itself rule out anticoagulation.' : 'Below the high-risk threshold of 3.'),
-    refs: ['pisters2010', 'wikiHasbled'], review: UNREVIEWED,
+    refs: ['pisters2010'], review: UNREVIEWED,
   },
   {
     id: 'childpugh', name: 'Child-Pugh',
@@ -181,7 +181,7 @@ export const SCORES = [
       { key: 'enc', label: 'Encephalopathy', options: [[1, 'None'], [2, 'Grade 1 to 2'], [3, 'Grade 3 to 4']] },
     ],
     interp: (t) => (t <= 6 ? 'Class A (5 to 6)' : t <= 9 ? 'Class B (7 to 9)' : 'Class C (10 to 15)'),
-    refs: ['pugh1973', 'vaChild'], review: UNREVIEWED,
+    refs: ['child1964', 'pugh1973'], review: UNREVIEWED,
   },
   {
     id: 'fourts', name: '4Ts (heparin-induced thrombocytopenia)',

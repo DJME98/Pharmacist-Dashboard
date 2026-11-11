@@ -102,7 +102,10 @@ test('critical care doses and caps', () => {
 test('tool outputs', () => {
   const phen = tool(LAB_TOOLS, 'phenytoin').compute({ level: 8, albumin: 2, renal: 'yes' });
   assert.equal(phen[0].value, '26.7');
-  assert.equal(phen[1].value, '16');
+  assert.equal(phen.length, 1);
+  const phenNormal = tool(LAB_TOOLS, 'phenytoin').compute({ level: 8, albumin: 2, renal: 'no' });
+  assert.equal(phenNormal[0].value, '16');
+  assert.equal(phenNormal[1].value, '12.3');
 });
 
 test('score item point maximums', () => {
@@ -151,7 +154,7 @@ test('insulin rules', () => {
   assert.equal(rule('deg-basal').splitAbove, 80);
   assert.ok(rule('basal-nph').alwaysSplit);
   for (const r of BASAL_RULES) assert.ok(r.label && r.pct.length === 2, r.id);
-  assert.deepEqual(rule('once-u300').pct, [100, 110]);
+  assert.deepEqual(rule('once-u300').pct, [100, 100]);
 });
 
 test('weight limits for critical care', () => {

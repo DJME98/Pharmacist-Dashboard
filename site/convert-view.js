@@ -361,18 +361,19 @@ export function renderConvert(h, mount) {
     const rows = OPIOIDS.filter((o) => o.equi).map((o) => h('tr', { class: o.alt ? 'conflict' : '' },
       h('td', {}, o.name), h('td', {}, `${fmt(o.equi)} ${o.unit}`),
       h('td', {}, o.cdcFactor ? String(o.cdcFactor) : ''),
+      h('td', {}, o.basis ?? ''),
       h('td', {}, (o.alt ?? []).map((a) => `${SOURCES[a.src].label}: ${fmt(a.v)} ${o.unit}${a.note ? ` (${a.note})` : ''}`).join('; '))));
     const extra = OPIOID_TABLE_ONLY.map((o) => h('tr', {},
       h('td', {}, o.name), h('td', {}, `${o.equi} ${o.unit}`), h('td', {}, ''),
-      h('td', {}, `${SOURCES[o.src].label}. Mixed agonist-antagonist: table only`)));
+      h('td', {}, SOURCES[o.src].label), h('td', {}, 'Mixed agonist-antagonist: table only')));
     const fixed = OPIOIDS.filter((o) => o.noConvert).map((o) => h('tr', {},
       h('td', {}, o.name), h('td', {}, 'No fixed ratio'), h('td', {}, String(o.cdcFactor)),
-      h('td', {}, o.noConvert === 'methadone' ? 'Ratio depends on dose; get specialist input' : 'Use the label table, one direction only')));
+      h('td', {}, o.noConvert === 'methadone' ? 'Ratio rises with the previous opioid dose (Pereira 2001)' : 'Oral morphine to patch about 70:1 (Donner 1996); use the label table, one direction only'), h('td', {}, '')));
     return h('section', { class: 'group' },
       h('h2', {}, 'Equianalgesic table'),
-      h('p', {}, 'Doses equivalent to morphine 10 mg IV, for chronic dosing.'),
+      h('p', {}, 'Doses equivalent to morphine 10 mg IV (oral morphine 30 mg). Oral values use the CDC 2022 factors and the cancer-pain studies behind them; IV values come from randomized IV PCA trials (Dinges 2022).'),
       h('div', { class: 'scroll' }, h('table', { class: 'data list' },
-        h('thead', {}, h('tr', {}, ['Opioid', 'Equivalent dose', 'CDC MME factor', 'Other sources'].map((t) => h('th', { scope: 'col' }, t)))),
+        h('thead', {}, h('tr', {}, ['Opioid', 'Equivalent dose', 'CDC MME factor', 'Basis', 'Other data'].map((t) => h('th', { scope: 'col' }, t)))),
         h('tbody', {}, rows, fixed, extra))));
   }
 
@@ -420,10 +421,10 @@ export function renderConvert(h, mount) {
 
   function drawIvpo() {
     put(body, 
-      h('p', {}, 'Antimicrobial IV to oral switches from two hospital protocols. Azoles generally need loading doses when started.'),
+      h('p', {}, 'Oral bioavailability from Hale 2018 (Table 1); dose pairs from the US labels. Switch criteria follow the UK national IV-to-oral switch criteria (Harvey 2023).'),
       h('div', { class: 'scroll' }, h('table', { class: 'data ivpo' },
-        h('thead', {}, h('tr', {}, ['Drug', 'IV', 'Oral'].map((t) => h('th', { scope: 'col' }, t)))),
-        h('tbody', {}, IVPO.map((r) => h('tr', {}, h('td', {}, r.drug, r.note && h('span', { class: 'basis' }, r.note)), h('td', {}, r.iv), h('td', {}, r.po)))))),
+        h('thead', {}, h('tr', {}, ['Drug', 'IV', 'Oral', 'Oral bioavailability'].map((t) => h('th', { scope: 'col' }, t)))),
+        h('tbody', {}, IVPO.map((r) => h('tr', {}, h('td', {}, r.drug, r.note && h('span', { class: 'basis' }, r.note)), h('td', {}, r.iv), h('td', {}, r.po), h('td', {}, r.bio)))))),
       h('h2', {}, 'Do not switch if'),
       h('ul', { class: 'plain' }, IVPO_EXCLUSIONS.map((e) => h('li', {}, e))),
       ...footer(IVPO_ITEM));

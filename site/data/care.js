@@ -27,18 +27,16 @@ export const CARE_SECTIONS = [
     ],
   },
   {
-    id: 'anaphylaxis', name: 'Anaphylaxis', review: UNREVIEWED, refs: ['msdAnaphylaxis', 'cmajEpi'],
+    id: 'anaphylaxis', name: 'Anaphylaxis', review: UNREVIEWED, refs: ['golden2023', 'neffyLabel', 'rcuk2021'],
     intro: 'Give IM epinephrine first. Antihistamines and steroids do not replace it.',
     doses: [
       { id: 'epi-im', name: 'Epinephrine 1 mg/mL', route: 'IM, mid-outer thigh', lines: [
         { label: 'Weight-based', perKg: 0.01, unit: 'mg', max: 0.5 },
-        { label: 'Adult', text: '0.3 to 0.5 mg' },
-        { label: 'Repeat', text: 'Every 5 to 15 min' },
-      ], note: 'CMAJ caps prepubertal children at 0.3 mg and adolescents at 0.5 mg. Autoinjectors: 0.15 mg at 15 to 30 kg; 0.3 mg over 30 kg.' },
-      { id: 'epi-in', name: 'Epinephrine, intranasal', route: 'One spray', lines: [{ label: '30 kg or more', text: '2 mg' }, { label: '15 to under 30 kg, age 4 or older', text: '1 mg' }, { label: 'Repeat', text: 'Same nostril after 5 min if needed' }] },
-      { id: 'epi-infusion', name: 'Epinephrine infusion', route: 'IV, 4 mcg/mL', lines: [{ label: 'Start', perKg: 0.1, unit: 'mcg/min' }, { label: 'Titrate', perKg: 0.05, unit: 'mcg/min' }, { label: 'If weight unknown', text: '1 to 2 mcg/min, then increase by 2 to 4 mcg/min every 2 to 3 min' }], note: 'The titration step is applied every 2 to 3 min.' },
-      { id: 'epi-iv', name: 'Epinephrine IV bolus, adult', route: 'IV over 1 to 2 min, 0.1 mg/mL', lines: [{ label: 'Dose', text: '0.05 to 0.1 mg (0.5 to 1 mL)' }] },
-      { id: 'glucagon-ana', name: 'Glucagon (on beta blockers)', route: 'IV over 5 min', lines: [{ label: 'Adult', text: '1 to 5 mg' }, { label: 'Pediatric', range: [20, 30], unit: 'mcg' }, { label: 'Infusion', text: '5 to 15 mcg/min' }] },
+        { label: 'Children and teenagers, maximum', text: '0.3 mg' },
+        { label: 'Adults, maximum', text: '0.5 mg' },
+      ], note: 'Autoinjectors (FDA): 0.1 mg at 7.5 to 15 kg, 0.15 mg at 15 to 30 kg, 0.3 mg at 30 kg or more. The practice parameter supports switching to 0.3 mg at 25 kg.' },
+      { id: 'epi-in', name: 'Epinephrine nasal spray (neffy)', route: 'One spray in one nostril', lines: [{ label: '30 kg or more', text: '2 mg' }, { label: '15 to under 30 kg', text: '1 mg' }, { label: 'Repeat', text: 'Same nostril, starting 5 min after the first dose' }] },
+      { id: 'epi-infusion', name: 'Epinephrine infusion, refractory anaphylaxis', route: 'IV, 1 mg in 100 mL NS (10 mcg/mL)', lines: [{ label: 'Start, low', perKg: 0.5, unit: 'mL/h' }, { label: 'Start, high', perKg: 1, unit: 'mL/h' }, { label: 'Then', text: 'Titrate to response' }], note: 'Adults and children (Resuscitation Council UK 2021). Equals about 0.08 to 0.17 mcg/kg/min. IV boluses are not recommended outside specialist settings. In patients on beta-blockers, consider glucagon; neither guideline gives a dose.' },
     ],
   },
 ];

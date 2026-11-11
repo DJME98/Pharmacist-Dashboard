@@ -43,6 +43,14 @@ For reference only. Use clinical judgment, and confirm doses against current ref
 - Conversions say where their numbers come from (the trials, pharmacology studies, or consensus behind them); benzodiazepines are grouped by half-life; steroids and ARBs show duration bars
 - ACLS and PALS: how each drug is given, shocks first in cardiac arrest, and weight ranges on the Broselow zones
 
+## Local anesthetics
+
+- Maximum doses from each product's US label; several local anesthetics add as shares of their own maximum, because toxicity is additive
+
+## Sources
+
+Sources are original papers, FDA labels, government agencies, and guideline bodies. Websites that restate other sources are not used.
+
 ## Publishing
 
 In the repository, open Settings, then Pages, and set Source to GitHub Actions. Each push to `main` then runs the tests and publishes `site/`.

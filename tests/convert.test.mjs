@@ -14,15 +14,16 @@ test('single-value conversions', () => {
   assert.deepEqual(convertDose(4, eq('benzo', 'lorazepam'), eq('benzo', 'diazepam')), [40, 40]);
   assert.deepEqual(convertDose(40, eq('steroid', 'prednisone'), eq('steroid', 'methylprednisolone')), [32, 32]);
   assert.deepEqual(convertDose(100, eq('beta', 'metoprolol'), eq('beta', 'carvedilol')), [25, 25]);
-  assert.deepEqual(convertDose(80, eq('loop', 'furosemide-po'), eq('loop', 'bumetanide')), [2, 2]);
+  assert.deepEqual(convertDose(80, eq('loop', 'furosemide-po'), eq('loop', 'bumetanide')), [1, 1]);
+  assert.deepEqual(convertDose(40, eq('loop', 'furosemide-iv'), eq('loop', 'torsemide')), [20, 20]);
   close(convertDose(6, eq('steroid', 'dexamethasone'), eq('steroid', 'hydrocortisone'))[0], 160);
 });
 
 test('range conversions widen in both directions', () => {
-  assert.deepEqual(convertDose(40, eq('loop', 'furosemide-po'), eq('loop', 'torsemide')), [10, 20]);
-  assert.deepEqual(convertDose(20, eq('loop', 'torsemide'), eq('loop', 'furosemide-po')), [40, 80]);
+  assert.deepEqual(convertDose(100, eq('arb', 'losartan'), eq('arb', 'olmesartan')), [20, 40]);
+  assert.deepEqual(convertDose(40, eq('arb', 'olmesartan'), eq('arb', 'losartan')), [100, 200]);
   assert.deepEqual(convertDose(10, eq('ace', 'lisinopril'), eq('ace', 'enalapril')), [10, 10]);
-  assert.deepEqual(convertDose(50, eq('arb', 'losartan'), eq('arb', 'candesartan')), [8, 16]);
+  assert.deepEqual(convertDose(50, eq('arb', 'losartan'), eq('arb', 'irbesartan')), [75, 150]);
 });
 
 test('PPI conversions use standard-dose equivalence', () => {
@@ -39,9 +40,9 @@ test('practical rounding goes to the nearest real step, never zero', () => {
 });
 
 test('conflicting sources give their own results', () => {
-  const benzo = RATIO_TABLES.find((t) => t.id === 'benzo');
-  const from = benzo.drugs.find((d) => d.alt?.length);
-  const to = benzo.drugs.find((d) => d.id === 'diazepam');
+  const steroid = RATIO_TABLES.find((t) => t.id === 'steroid');
+  const from = steroid.drugs.find((d) => d.alt?.length);
+  const to = steroid.drugs.find((d) => d.id === 'prednisone');
   const alts = altResults(10, from, to);
   assert.ok(alts.length >= 1);
   for (const a of alts) assert.ok(a.src && a.range.every(Number.isFinite));
@@ -68,10 +69,10 @@ test('IV opioids convert but do not count toward MME', () => {
 
 test('opioid conversion applies the reduction', () => {
   const r = opioidTarget(90, opioid('hydromorphone-po'), 33, 6);
-  close(r.calculated, 22.5);
-  close(r.daily, 15.075);
-  close(r.perDose, 2.5125);
-  close(r.rescue, 3.015);
+  close(r.calculated, 18);
+  close(r.daily, 12.06);
+  close(r.perDose, 2.01);
+  close(r.rescue, 2.412);
   close(opioidTarget(30, opioid('morphine-iv'), 0, null).daily, 10);
 });
 

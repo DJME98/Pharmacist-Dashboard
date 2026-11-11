@@ -16,7 +16,7 @@ const ibwOf = (p) => f.ibwDevine(p.sex, p.heightCm);
 const bmiOf = (p) => f.bmi(p.weightKg, p.heightCm);
 
 const CG_FORMULA = '(140 − age) × weight ÷ (72 × SCr), × 0.85 if female';
-const CG_REFS = ['cg1976', 'winter2012', 'mdcalcCg'];
+const CG_REFS = ['cg1976', 'winter2012'];
 const CKID_NOTE = 'Published for ages 1 to 25. Enzymatic creatinine and nephelometric, IFCC-standardized cystatin C are recommended.';
 
 function cgEntry(id, name, chooseWeight, extra = {}) {
@@ -64,7 +64,7 @@ export const CALCULATIONS = [
       ? '(146 − age) × (0.287 × kg + 9.74 × m²) ÷ (60 × SCr)'
       : '(137 − age) × (0.285 × kg + 12.1 × m²) ÷ (51 × SCr)'),
     note: 'Developed for obese patients. Shown when BMI is 30 or above.',
-    refs: ['salazar1988', 'globalrphSalazar', 'rxkOther'],
+    refs: ['salazar1988'],
     review: UNREVIEWED,
   },
   {
@@ -87,7 +87,7 @@ export const CALCULATIONS = [
     },
     formula: (p) => `Production = weight × ${p.sex === 'F' ? '(25.3 − 0.175 × age)' : '(29.3 − 0.203 × age)'}; V = 0.6 L/kg × weight; CrCl = (Production − V × 10 × (SCr latest − SCr earlier) ÷ days) × 100 ÷ (SCr used × 1440)`,
     note: 'Uses V of 0.6 L/kg, the lesser of ideal and actual weight, latest SCr if rising, and average SCr if falling. Other published versions use different coefficients. Less accurate while renal function is improving.',
-    refs: ['jelliffe2002', 'jelliffe1972', 'rxkRenal', 'gfrAkiModelling'],
+    refs: ['jelliffe2002', 'jelliffe1972'],
     review: UNREVIEWED,
   },
   {
@@ -100,7 +100,7 @@ export const CALCULATIONS = [
     applies: adult,
     compute: (p) => ({ value: f.ckdEpiCr2021(p.ageY, p.scr, p.sex) }),
     formula: (p) => `142 × min(SCr/${p.sex === 'F' ? '0.7' : '0.9'}, 1)^${p.sex === 'F' ? '−0.241' : '−0.302'} × max(SCr/${p.sex === 'F' ? '0.7' : '0.9'}, 1)^−1.200 × 0.9938^age${p.sex === 'F' ? ' × 1.012' : ''}`,
-    refs: ['inker2021', 'niddkAdults', 'nkfCkdEpi'],
+    refs: ['inker2021'],
     review: UNREVIEWED,
   },
   {
@@ -113,7 +113,7 @@ export const CALCULATIONS = [
     applies: adult,
     compute: (p) => ({ value: f.ckdEpiCys2012(p.ageY, p.cys, p.sex) }),
     formula: (p) => `133 × min(CysC/0.8, 1)^−0.499 × max(CysC/0.8, 1)^−1.328 × 0.996^age${p.sex === 'F' ? ' × 0.932' : ''}`,
-    refs: ['inker2012', 'niddkAdults'],
+    refs: ['inker2012'],
     review: UNREVIEWED,
   },
   {
@@ -127,7 +127,7 @@ export const CALCULATIONS = [
     compute: (p) => ({ value: f.ckdEpiCrCys2021(p.ageY, p.scr, p.cys, p.sex) }),
     formula: (p) => `135 × min(SCr/${p.sex === 'F' ? '0.7' : '0.9'}, 1)^${p.sex === 'F' ? '−0.219' : '−0.144'} × max(SCr/${p.sex === 'F' ? '0.7' : '0.9'}, 1)^−0.544 × min(CysC/0.8, 1)^−0.323 × max(CysC/0.8, 1)^−0.778 × 0.9961^age${p.sex === 'F' ? ' × 0.963' : ''}`,
     note: 'KDIGO 2024 recommends the combined estimate when creatinine-based eGFR is less accurate.',
-    refs: ['inker2021', 'niddkAdults', 'ckdepiCombinedQx', 'kdigo2024'],
+    refs: ['inker2021', 'kdigo2024'],
     review: UNREVIEWED,
   },
   {
@@ -141,7 +141,7 @@ export const CALCULATIONS = [
     compute: (p) => ({ value: f.neonatalGfr(p.heightCm, p.scr) }),
     formula: () => '0.31 × height (cm) ÷ SCr',
     note: 'For term-born infants only. Enzymatic, IDMS-standardized creatinine is recommended.',
-    refs: ['smeets2022', 'niddkPeds'],
+    refs: ['smeets2022'],
     review: UNREVIEWED,
   },
   {
@@ -154,8 +154,8 @@ export const CALCULATIONS = [
     applies: (p) => p.ageY !== null && p.ageY >= 1 && p.ageY < 18,
     compute: (p) => ({ value: f.bedsideSchwartz(p.heightCm, p.scr) }),
     formula: () => '41.3 × height (m) ÷ SCr',
-    note: 'NIDDK reserves this for quick, urgent estimates in children.',
-    refs: ['schwartz2009', 'niddkPeds'],
+    note: 'A single-coefficient bedside estimate (Schwartz 2009); the newer CKiD U25 equations are more accurate across ages.',
+    refs: ['schwartz2009'],
     review: UNREVIEWED,
   },
   {
@@ -169,7 +169,7 @@ export const CALCULATIONS = [
     compute: (p) => ({ value: f.u25Cr(p.ageY, p.heightCm, p.scr, p.sex), used: `K = ${f.u25CrK(p.ageY, p.sex).toFixed(2)}` }),
     formula: () => 'K × height (m) ÷ SCr; K depends on age and sex',
     note: CKID_NOTE,
-    refs: ['pierce2021', 'niddkPeds'],
+    refs: ['pierce2021'],
     review: UNREVIEWED,
   },
   {
@@ -183,7 +183,7 @@ export const CALCULATIONS = [
     compute: (p) => ({ value: f.u25Cys(p.ageY, p.cys, p.sex), used: `K = ${f.u25CysK(p.ageY, p.sex).toFixed(2)}` }),
     formula: () => 'K ÷ CysC; K depends on age and sex',
     note: CKID_NOTE,
-    refs: ['pierce2021', 'niddkPeds'],
+    refs: ['pierce2021'],
     review: UNREVIEWED,
   },
   {
@@ -196,8 +196,8 @@ export const CALCULATIONS = [
     applies: between(1, 25),
     compute: (p) => ({ value: f.u25CrCys(p.ageY, p.heightCm, p.scr, p.cys, p.sex) }),
     formula: () => '(U25 creatinine + U25 cystatin C) ÷ 2',
-    note: `NIDDK prefers this average when both markers are available. ${CKID_NOTE}`,
-    refs: ['pierce2021', 'niddkPeds'],
+    note: `Pierce 2021 found the average of the creatinine and cystatin C estimates more accurate than either alone. ${CKID_NOTE}`,
+    refs: ['pierce2021'],
     review: UNREVIEWED,
   },
   {
@@ -211,7 +211,7 @@ export const CALCULATIONS = [
     compute: (p) => ({ value: f.ekfcCr(p.ageY, p.scr, p.sex), used: `Q = ${f.ekfcCreatinineQ(p.ageY, p.sex).toFixed(1)} µmol/L` }),
     formula: () => '107.3 × (SCr/Q)^A × (0.990^(age − 40) if age over 40); A = −0.322 if SCr/Q is below 1, otherwise −1.132',
     note: 'Uses the default Q values. Population-specific Q values exist and are not applied here.',
-    refs: ['pottel2021', 'kidneyEpi', 'egfrManual', 'niddkAdults'],
+    refs: ['pottel2021'],
     review: UNREVIEWED,
   },
   {
@@ -224,7 +224,7 @@ export const CALCULATIONS = [
     applies: (p) => p.ageY !== null && p.ageY >= 2,
     compute: (p) => ({ value: f.ekfcCys(p.ageY, p.cys), used: `Q = ${f.ekfcCystatinQ(p.ageY).toFixed(3)} mg/L` }),
     formula: () => '107.3 × (CysC/Q)^A × (0.990^(age − 40) if age over 40); Q = 0.83, plus 0.005 × (age − 50) from age 50',
-    refs: ['pottel2023', 'kidneyEpi', 'egfrManual'],
+    refs: ['pottel2023'],
     review: UNREVIEWED,
   },
   {
@@ -237,7 +237,7 @@ export const CALCULATIONS = [
     applies: (p) => p.ageY !== null && p.ageY >= 2,
     compute: (p) => ({ value: f.ekfcCombined(p.ageY, p.scr, p.cys, p.sex) }),
     formula: () => '(EKFC creatinine + EKFC cystatin C) ÷ 2',
-    refs: ['pottel2023', 'egfrManual'],
+    refs: ['pottel2023', 'pottel2021'],
     review: UNREVIEWED,
   },
   {
@@ -251,7 +251,7 @@ export const CALCULATIONS = [
     compute: (p) => ({ value: bmiOf(p) }),
     formula: () => 'weight (kg) ÷ height (m)²',
     note: 'Adult categories only apply from age 18.',
-    refs: ['cdcBmi'],
+    refs: ['who2000'],
     review: UNREVIEWED,
   },
   {
@@ -278,7 +278,7 @@ export const CALCULATIONS = [
     applies: adult,
     compute: (p) => ({ value: f.adjBw(ibwOf(p), p.weightKg) }),
     formula: () => 'IBW + 0.4 × (actual weight − IBW)',
-    refs: ['winter2012', 'mdcalcCg'],
+    refs: ['traynor1995', 'winter2012'],
     review: UNREVIEWED,
   },
   {
@@ -291,7 +291,7 @@ export const CALCULATIONS = [
     applies: () => true,
     compute: (p) => ({ value: f.bsaMosteller(p.weightKg, p.heightCm) }),
     formula: () => '√(weight (kg) × height (cm) ÷ 3600)',
-    refs: ['mosteller1987', 'radiopaediaBsa'],
+    refs: ['mosteller1987'],
     review: UNREVIEWED,
   },
   {
@@ -304,7 +304,7 @@ export const CALCULATIONS = [
     applies: () => true,
     compute: (p) => ({ value: f.bsaDuBois(p.weightKg, p.heightCm) }),
     formula: () => '0.007184 × weight (kg)^0.425 × height (cm)^0.725',
-    refs: ['dubois1916', 'bsaComparison'],
+    refs: ['dubois1916'],
     review: UNREVIEWED,
   },
 ];
