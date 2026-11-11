@@ -1,11 +1,11 @@
 import { put } from './dom.js';
-import { LOCAL_AGENTS } from './data/local.js';
+import { LOCAL_AGENTS, LOCAL_PROFILES, LOCAL_FLAGS, LOCAL_ALLERGY } from './data/local.js';
 import { cumulative, leanBodyWeight, maxDose, mgFrom } from './calc/local.js';
 import { REFERENCES } from './data/references.js';
 
 // Doses are held only in this object and are never stored or sent.
 const state = { weightBasis: 'actual', rows: [{ agent: 'lido', pct: '1', mL: '', mg: '' }] };
-const REFS = ['lidoLabel', 'bupiLabel', 'ropiLabel', 'mepiLabel', 'chloroLabel', 'articLabel', 'priloLabel', 'neal2018', 'janmahasatian2005'];
+const REFS = ['lidoLabel', 'xylocaineLabel', 'lidoDentalLabel', 'bupiLabel', 'ropiLabel', 'mepiLabel', 'chloroLabel', 'articLabel', 'priloLabel', 'neal2018', 'bhole2012', 'kocaKalkan2021', 'janmahasatian2005'];
 
 const num = (t) => {
   const s = String(t ?? '').trim();
@@ -121,6 +121,24 @@ export function renderLocal(h, mount) {
     h('button', { type: 'button', class: 'link-btn la-add', onclick: () => { state.rows.push({ agent: 'bupi', pct: '0.25', mL: '', mg: '' }); drawRows(); calc(); } }, 'Add another local anesthetic'),
     h('section', { class: 'group' }, h('h2', {}, 'Total'), resultEl),
     h('section', { class: 'group' }, remainEl),
+    h('section', { class: 'group' },
+      h('h2', {}, 'How they differ'),
+      h('div', { class: 'la-legend' },
+        h('span', { class: 'cls-badge cls-amide' }, 'AMIDE'), h('span', {}, 'liver metabolism'),
+        h('span', { class: 'cls-badge cls-ester' }, 'ESTER'), h('span', {}, 'plasma cholinesterase, PABA metabolite'),
+        ['short', 'mid', 'long'].map((c) => h('span', { class: `dur-key dur-${c}` }, { short: 'Short', mid: 'Intermediate', long: 'Long' }[c]))),
+      h('div', { class: 'la-cards' }, LOCAL_PROFILES.map((pr) => h('article', { class: `la-card la-${pr.cls}` },
+        h('header', {}, h('h3', {}, pr.name), h('span', { class: `cls-badge cls-${pr.cls}` }, pr.cls.toUpperCase())),
+        h('div', { class: 'la-dur' },
+          h('span', { class: `dur-track dur-${pr.durClass}` }, h('span', { class: 'dur-solid', style: `width:${(pr.dur[0] / 9) * 100}%` }),
+            pr.dur[1] > pr.dur[0] && h('span', { class: 'dur-range', style: `left:${(pr.dur[0] / 9) * 100}%;width:${((pr.dur[1] - pr.dur[0]) / 9) * 100}%` })),
+          h('span', { class: 'la-dur-text' }, h('b', {}, pr.durText), ` (${pr.ctx})`)),
+        pr.flags.length > 0 && h('div', { class: 'chips' }, pr.flags.map((f) => h('span', { class: `chip ${LOCAL_FLAGS[f].cls}` }, LOCAL_FLAGS[f].label))),
+        h('p', {}, pr.note)))),
+      h('p', { class: 'hint' }, 'Durations come from different settings in each label (dental, nerve block, surgery), so compare the bars only roughly. Epinephrine prolongs all of them.')),
+    h('section', { class: 'group' },
+      h('h2', {}, 'Allergy and cross-reactivity'),
+      h('div', { class: 'allergy-grid' }, LOCAL_ALLERGY.map((x, i) => h('div', { class: `allergy-card al-${i}` }, h('h3', {}, x.head), h('p', {}, x.text))))),
     h('section', { class: 'group' },
       h('h2', {}, 'Label limits'),
       h('div', { class: 'scroll' }, h('table', { class: 'data list' },

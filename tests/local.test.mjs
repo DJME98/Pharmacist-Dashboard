@@ -51,3 +51,14 @@ test('concentration arithmetic and lean body weight', () => {
 test('every agent cites a reference that exists', () => {
   for (const a of LOCAL_AGENTS) assert.ok(REFERENCES[a.ref], a.id);
 });
+
+test('local anesthetic profiles cover every agent family with class and duration', async () => {
+  const { LOCAL_PROFILES, LOCAL_FLAGS } = await import('../site/data/local.js');
+  assert.equal(LOCAL_PROFILES.length, 7);
+  for (const p of LOCAL_PROFILES) {
+    assert.ok(['amide', 'ester'].includes(p.cls), p.id);
+    assert.ok(p.dur[0] <= p.dur[1] && ['short', 'mid', 'long'].includes(p.durClass), p.id);
+    for (const f of p.flags) assert.ok(LOCAL_FLAGS[f], f);
+  }
+  assert.equal(LOCAL_PROFILES.find((p) => p.id === 'chloro').cls, 'ester');
+});

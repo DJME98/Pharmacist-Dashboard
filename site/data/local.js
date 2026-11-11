@@ -62,3 +62,37 @@ export const LOCAL_AGENTS = [
     ref: 'priloLabel',
   },
 ];
+
+// How the agents differ. Class, duration, and additives from each US label; allergy data from Bhole 2012 and Koca Kalkan 2021.
+// dur: hours, in the setting the label reports (ctx). Settings differ, so compare bars only roughly.
+export const LOCAL_PROFILES = [
+  { id: 'chloro', name: 'Chloroprocaine', cls: 'ester', dur: [1, 1], durClass: 'short', durText: 'Up to 60 min', ctx: 'label, by dose and route', flags: ['paba'],
+    note: 'Broken down in plasma by pseudocholinesterase; slower in cholinesterase deficiency. Its PABA-like metabolite inhibits sulfonamides. Contraindicated with allergy to PABA-ester drugs.' },
+  { id: 'artic', name: 'Articaine (with epinephrine)', cls: 'amide', dur: [1, 2], durClass: 'short', durText: '1 h infiltration, up to 2 h block', ctx: 'dental label', flags: ['sulfite'],
+    note: 'An amide that is broken down mainly by plasma carboxyesterase, so it is cleared quickly.' },
+  { id: 'lido', name: 'Lidocaine', cls: 'amide', dur: [1, 1.5], durClass: 'short', durText: 'Pulpal 60 to 90 min with epinephrine', ctx: 'dental label; the plain-lidocaine label gives no fixed time', flags: ['sulfite', 'paraben'],
+    note: 'No cross-sensitivity reported with procainamide or with PABA-derivative (ester) allergy (label).' },
+  { id: 'prilo', name: 'Prilocaine', cls: 'amide', dur: [2, 2.5], durClass: 'mid', durText: 'Soft tissue 2 to 2.5 h', ctx: 'dental label', flags: ['methb'],
+    note: 'Can cause methemoglobinemia, most of all in infants under 6 months and in G6PD deficiency. No cross-sensitivity with PABA-derivative allergy (label).' },
+  { id: 'mepi', name: 'Mepivacaine', cls: 'amide', dur: [2, 2.5], durClass: 'mid', durText: '2 to 2.5 h of surgery', ctx: 'label', flags: ['paraben'],
+    note: 'Single-dose (MPF) vials have no methylparaben.' },
+  { id: 'bupi', name: 'Bupivacaine', cls: 'amide', dur: [7, 7], durClass: 'long', durText: 'Up to 7 h', ctx: 'dental label', flags: ['sulfite', 'paraben'],
+    note: 'Long acting; analgesia can persist after sensation returns (label).' },
+  { id: 'ropi', name: 'Ropivacaine', cls: 'amide', dur: [3.7, 8.7], durClass: 'long', durText: '3.7 to 8.7 h axillary block; 4 h epidural', ctx: 'label clinical studies', flags: [],
+    note: 'Single-dose vials without preservative.' },
+];
+
+export const LOCAL_FLAGS = {
+  paba: { label: 'PABA metabolite', cls: 'flag-paba' },
+  sulfite: { label: 'Sulfite in epinephrine forms', cls: 'flag-sulfite' },
+  paraben: { label: 'Methylparaben in multi-dose vials', cls: 'flag-paraben' },
+  methb: { label: 'Methemoglobinemia', cls: 'flag-methb' },
+};
+
+export const LOCAL_ALLERGY = [
+  { head: 'True allergy is rare', text: 'IgE-mediated allergy was confirmed in 29 of 2,978 people tested across 23 case series (0.97%) (Bhole 2012). Most suspected reactions are vasovagal, anxiety, or epinephrine effects.' },
+  { head: 'Esters cross-react with each other', text: 'Cross-sensitivity among ester-type local anesthetics has been reported (chloroprocaine label). Avoid other esters after an ester reaction.' },
+  { head: 'Esters and amides do not', text: 'Patients allergic to PABA derivatives (procaine, tetracaine, benzocaine) have not shown cross-sensitivity to lidocaine or prilocaine (labels). An amide is usually the choice after an ester reaction.' },
+  { head: 'Amides rarely cross-react', text: 'Cross-sensitivity among amides has been reported (labels). In 398 people tested, 14 reacted and 3 reacted to more than one amide (Koca Kalkan 2021). Confirm a different amide by allergist challenge.' },
+  { head: 'Check the additives', text: 'Reactions can come from methylparaben in multi-dose vials or sulfite (sodium metabisulfite) in epinephrine-containing solutions, not the anesthetic itself (labels). Single-dose, preservative-free products avoid paraben.' },
+];

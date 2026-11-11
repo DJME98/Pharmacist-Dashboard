@@ -118,26 +118,27 @@ export const RATIO_TABLES = [
     basisRefs: ['wong2016Beta', 'abdaBeta'],
     durationLabel: 'Elimination half-life',
     durNote: 'Half-life does not closely track how long the effect lasts.',
+    propLegend: true,
     groups: [
       { id: 'sel', label: 'Cardioselective (beta-1), no other effects' },
       { id: 'other', label: 'Other effects (see notes)' },
     ],
     drugs: [
-      { id: 'metoprolol', name: 'Metoprolol tartrate', group: 'sel', equiv: 100, step: 12.5, dur: [3, 7], durClass: 'short', durText: '3 to 7 h', detail: 'ABDA 50 mg BID' },
-      { id: 'metoprolol-er', name: 'Metoprolol succinate ER', group: 'sel', equiv: 100, step: 12.5, dur: [3, 7], durClass: 'short', durText: '3 to 7 h; extended release', detail: 'ABDA 95 mg daily (German strength)' },
-      { id: 'bisoprolol', name: 'Bisoprolol', group: 'sel', equiv: 10, step: 1.25, dur: [9, 12], durClass: 'mid', durText: '9 to 12 h', detail: 'ABDA medium dose', alt: [{ v: 5, src: 'abda', note: 'low dose' }] },
-      { id: 'atenolol', name: 'Atenolol', group: 'sel', equiv: 50, step: 12.5, dur: [6, 9], durClass: 'mid', durText: '6 to 9 h', detail: 'Cleared mainly by the kidneys; adjust for kidney function. ABDA low 25 to 50 mg, maximum 100 mg' },
-      { id: 'betaxolol', name: 'Betaxolol', group: 'sel', equiv: [10, 20], step: 5, dur: [14, 22], durClass: 'long', durText: '14 to 22 h', detail: 'ABDA low to maximum dose' },
-      { id: 'nebivolol', name: 'Nebivolol', group: 'other', equiv: 5, step: 2.5, dur: [12, 19], durClass: 'long', durText: '12 to 19 h', detail: 'Beta-1 selective at 10 mg or less; blocks beta-2 too at higher doses or in poor CYP2D6 metabolizers. The label lists vasodilation as a possible mechanism. ABDA hypertension dose' },
-      { id: 'acebutolol', name: 'Acebutolol', group: 'other', equiv: 400, step: 100, dur: [3, 4], durClass: 'short', durText: '3 to 4 h', detail: 'Beta-1 selective with intrinsic sympathomimetic (partial agonist) activity: less slowing of resting heart rate. Label start 400 mg daily; usual 400 to 800 mg daily' },
-      { id: 'carvedilol', name: 'Carvedilol', group: 'other', equiv: 25, step: 3.125, dur: [7, 10], durClass: 'mid', durText: '7 to 10 h', detail: 'Nonselective plus alpha-1 blockade: more vasodilation and blood-pressure lowering. ABDA hypertension medium dose; 50 mg for angina', alt: [{ v: 50, src: 'abda', note: 'angina medium dose' }] },
-      { id: 'labetalol', name: 'Labetalol', group: 'other', equiv: 200, step: 100, dur: [3, 6], durClass: 'short', durText: '3 to 6 h', detail: 'Nonselective plus alpha-1 blockade. Label start 100 mg BID; maintenance 200 to 400 mg BID' },
-      { id: 'pindolol', name: 'Pindolol', group: 'other', equiv: 15, step: 2.5, dur: [3, 4], durClass: 'short', durText: '3 to 4 h', detail: 'Nonselective with intrinsic sympathomimetic activity. ABDA 5 mg TID' },
-      { id: 'propranolol', name: 'Propranolol', group: 'other', equiv: [80, 240], step: 10, dur: [3, 4], durClass: 'short', durText: '3 to 4 h', detail: 'Nonselective: also blocks beta-2, so bronchospasm risk in asthma or COPD. ABDA 40 to 80 mg BID or TID' },
-      { id: 'propranolol-er', name: 'Propranolol ER', group: 'other', equiv: [80, 160], step: 20, dur: [8, 11], durClass: 'mid', durText: '8 to 11 h', detail: 'Nonselective. ABDA 80 or 160 mg daily' },
-      { id: 'nadolol', name: 'Nadolol', group: 'other', equiv: 40, step: 20, dur: [10, 20], durClass: 'long', durText: '10 to 20 h', detail: 'Nonselective. Label start 40 mg daily; maintenance 40 to 80 mg, up to 240 to 320 mg' },
-      { id: 'timolol', name: 'Timolol', group: 'other', equiv: 20, step: 10, dur: [4, 5], durClass: 'short', durText: '4 to 5 h', detail: 'Nonselective. Label start 10 mg BID; maintenance 20 to 40 mg daily' },
-      { id: 'sotalol', name: 'Sotalol', group: 'other', noConvert: 'Antiarrhythmic: do not swap', durText: 'See label', detail: 'Nonselective beta blocker plus Class III antiarrhythmic action (prolongs the action potential and QT). Used only for arrhythmias; do not swap for another beta blocker or convert by dose. Start or restart in a facility with continuous ECG monitoring, dose by CrCl, and stop other antiarrhythmics first (label boxed warning).' },
+      { id: 'metoprolol', name: 'Metoprolol tartrate', group: 'sel', props: ['b1'], equiv: 100, step: 12.5, dur: [3, 7], durClass: 'short', durText: '3 to 7 h', detail: 'ABDA 50 mg BID' },
+      { id: 'metoprolol-er', name: 'Metoprolol succinate ER', group: 'sel', props: ['b1'], equiv: 100, step: 12.5, dur: [3, 7], durClass: 'short', durText: '3 to 7 h; extended release', detail: 'ABDA 95 mg daily (German strength)' },
+      { id: 'bisoprolol', name: 'Bisoprolol', group: 'sel', props: ['b1'], equiv: 10, step: 1.25, dur: [9, 12], durClass: 'mid', durText: '9 to 12 h', detail: 'ABDA medium dose', alt: [{ v: 5, src: 'abda', note: 'low dose' }] },
+      { id: 'atenolol', name: 'Atenolol', group: 'sel', props: ['b1', 'renal'], equiv: 50, step: 12.5, dur: [6, 9], durClass: 'mid', durText: '6 to 9 h', detail: 'Cleared mainly by the kidneys; adjust for kidney function. ABDA low 25 to 50 mg, maximum 100 mg' },
+      { id: 'betaxolol', name: 'Betaxolol', group: 'sel', props: ['b1'], equiv: [10, 20], step: 5, dur: [14, 22], durClass: 'long', durText: '14 to 22 h', detail: 'ABDA low to maximum dose' },
+      { id: 'nebivolol', name: 'Nebivolol', group: 'other', props: ['b1', 'vaso'], equiv: 5, step: 2.5, dur: [12, 19], durClass: 'long', durText: '12 to 19 h', detail: 'Beta-1 selective at 10 mg or less; blocks beta-2 too at higher doses or in poor CYP2D6 metabolizers. The label lists vasodilation as a possible mechanism. ABDA hypertension dose' },
+      { id: 'acebutolol', name: 'Acebutolol', group: 'other', props: ['b1', 'isa'], equiv: 400, step: 100, dur: [3, 4], durClass: 'short', durText: '3 to 4 h', detail: 'Beta-1 selective with intrinsic sympathomimetic (partial agonist) activity: less slowing of resting heart rate. Label start 400 mg daily; usual 400 to 800 mg daily' },
+      { id: 'carvedilol', name: 'Carvedilol', group: 'other', props: ['ns', 'alpha'], equiv: 25, step: 3.125, dur: [7, 10], durClass: 'mid', durText: '7 to 10 h', detail: 'Nonselective plus alpha-1 blockade: more vasodilation and blood-pressure lowering. ABDA hypertension medium dose; 50 mg for angina', alt: [{ v: 50, src: 'abda', note: 'angina medium dose' }] },
+      { id: 'labetalol', name: 'Labetalol', group: 'other', props: ['ns', 'alpha'], equiv: 200, step: 100, dur: [3, 6], durClass: 'short', durText: '3 to 6 h', detail: 'Nonselective plus alpha-1 blockade. Label start 100 mg BID; maintenance 200 to 400 mg BID' },
+      { id: 'pindolol', name: 'Pindolol', group: 'other', props: ['ns', 'isa'], equiv: 15, step: 2.5, dur: [3, 4], durClass: 'short', durText: '3 to 4 h', detail: 'Nonselective with intrinsic sympathomimetic activity. ABDA 5 mg TID' },
+      { id: 'propranolol', name: 'Propranolol', group: 'other', props: ['ns'], equiv: [80, 240], step: 10, dur: [3, 4], durClass: 'short', durText: '3 to 4 h', detail: 'Nonselective: also blocks beta-2, so bronchospasm risk in asthma or COPD. ABDA 40 to 80 mg BID or TID' },
+      { id: 'propranolol-er', name: 'Propranolol ER', group: 'other', props: ['ns'], equiv: [80, 160], step: 20, dur: [8, 11], durClass: 'mid', durText: '8 to 11 h', detail: 'Nonselective. ABDA 80 or 160 mg daily' },
+      { id: 'nadolol', name: 'Nadolol', group: 'other', props: ['ns'], equiv: 40, step: 20, dur: [10, 20], durClass: 'long', durText: '10 to 20 h', detail: 'Nonselective. Label start 40 mg daily; maintenance 40 to 80 mg, up to 240 to 320 mg' },
+      { id: 'timolol', name: 'Timolol', group: 'other', props: ['ns'], equiv: 20, step: 10, dur: [4, 5], durClass: 'short', durText: '4 to 5 h', detail: 'Nonselective. Label start 10 mg BID; maintenance 20 to 40 mg daily' },
+      { id: 'sotalol', name: 'Sotalol', group: 'other', props: ['ns', 'class3'], noConvert: 'Antiarrhythmic: do not swap', durText: 'See label', detail: 'Nonselective beta blocker plus Class III antiarrhythmic action (prolongs the action potential and QT). Used only for arrhythmias; do not swap for another beta blocker or convert by dose. Start or restart in a facility with continuous ECG monitoring, dose by CrCl, and stop other antiarrhythmics first (label boxed warning).' },
     ],
     refs: ['abdaBeta', 'wong2016Beta', 'derpBeta', 'labetalolLabel', 'nadololLabel', 'acebutololLabel', 'timololLabel', 'bystolicLabel', 'sotalolLabel'], review: UNREVIEWED,
   },
@@ -312,4 +313,56 @@ export const IVPO_EXCLUSIONS = [
 
 export const IVPO_ITEM = { id: 'ivpo', name: 'IV to PO conversion', refs: ['hale2018', 'harvey2023', 'ciproLabel', 'fluconazoleLabel'], review: UNREVIEWED };
 
-export const CONVERSION_ITEMS = [OPIOID_ITEM, ...RATIO_TABLES, STATIN_ITEM, INSULIN_ITEM, IVPO_ITEM];
+// Topical corticosteroid potency (US seven-class system, vasoconstrictor assay), as tabulated by Stacey and McEleney 2021.
+export const TOPICAL_TIERS = [
+  { id: 't1', label: 'Super high', classes: 'Class I', limit: 'Up to 3 weeks at a time', note: 'Not on the face, groin, or skin folds, under occlusion, or in children, except rarely and briefly.', drugs: [
+    ['Betamethasone dipropionate, augmented', '0.05%', 'Ointment, lotion, gel'],
+    ['Clobetasol propionate', '0.05%', 'Ointment, cream, lotion, gel, foam, solution, shampoo, spray'],
+    ['Fluocinonide', '0.1%', 'Cream'],
+    ['Flurandrenolide', '4 mcg/cm²', 'Tape'],
+    ['Halobetasol propionate', '0.05%', 'Ointment, cream'],
+  ] },
+  { id: 't2', label: 'High', classes: 'Class II', limit: 'Up to 12 weeks at a time', note: 'Thick skin and severe disease; short courses on thin skin only.', drugs: [
+    ['Amcinonide', '0.1%', 'Ointment, cream'],
+    ['Betamethasone dipropionate', '0.05%', 'Ointment'],
+    ['Betamethasone dipropionate, augmented', '0.05%', 'Cream'],
+    ['Desoximetasone', '0.25%', 'Ointment, cream'],
+    ['Desoximetasone', '0.05%', 'Gel'],
+    ['Diflorasone diacetate', '0.05%', 'Ointment'],
+    ['Fluocinonide', '0.05%', 'Ointment, cream, gel, solution'],
+    ['Halcinonide', '0.1%', 'Ointment, cream, solution'],
+  ] },
+  { id: 't3', label: 'Medium', classes: 'Classes III to V', limit: 'Up to 12 weeks at a time', note: 'Most body sites. Face, groin, and folds: 1 to 2 week courses.', drugs: [
+    ['Amcinonide', '0.1%', 'Lotion'],
+    ['Betamethasone dipropionate', '0.05%', 'Cream, lotion'],
+    ['Betamethasone valerate', '0.12%', 'Foam'],
+    ['Betamethasone valerate', '0.1%', 'Ointment, cream, lotion'],
+    ['Diflorasone diacetate', '0.05%', 'Cream'],
+    ['Fluocinolone acetonide', '0.025%', 'Ointment, cream'],
+    ['Flurandrenolide', '0.05%', 'Ointment, cream, lotion'],
+    ['Fluticasone propionate', '0.05%', 'Cream, lotion'],
+    ['Fluticasone propionate', '0.005%', 'Ointment'],
+    ['Hydrocortisone butyrate', '0.1%', 'Ointment, cream, lotion, solution'],
+    ['Hydrocortisone valerate', '0.2%', 'Ointment, cream'],
+    ['Mometasone furoate', '0.1%', 'Ointment, cream, lotion, solution'],
+    ['Triamcinolone acetonide', '0.5%', 'Ointment, cream'],
+    ['Triamcinolone acetonide', '0.1%', 'Ointment, cream, lotion'],
+    ['Triamcinolone acetonide', '0.147 mg/g', 'Spray'],
+  ] },
+  { id: 't4', label: 'Low', classes: 'Classes VI and VII', limit: 'No set limit', note: 'Face, groin, folds, and children.', drugs: [
+    ['Alclometasone dipropionate', '0.05%', 'Ointment, cream'],
+    ['Desonide', '0.05%', 'Ointment, cream, lotion, gel, foam'],
+    ['Fluocinolone acetonide', '0.01%', 'Cream, solution, oil'],
+    ['Hydrocortisone', '2.5%', 'Ointment, cream, lotion, solution'],
+    ['Hydrocortisone', '1%', 'Ointment, cream, lotion, spray'],
+    ['Triamcinolone acetonide', '0.025%', 'Ointment, cream, lotion'],
+  ] },
+];
+
+export const TOPICAL_ITEM = {
+  id: 'topical', name: 'Topical steroid potency', refs: ['stacey2021', 'mckenzie1962', 'cornell1985'], review: UNREVIEWED,
+  basis: 'Classes come from the vasoconstrictor (skin-blanching) assay of McKenzie and Stoughton (1962), which correlated with clinical response in psoriasis (Cornell 1985). Stacey and McEleney note that the evidence linking assay strength to effect or harm is from small, nonrandomized trials. The same molecule can sit in different classes by strength and vehicle; ointments are usually stronger than creams.',
+  basisRefs: ['mckenzie1962', 'cornell1985', 'stacey2021'],
+};
+
+export const CONVERSION_ITEMS = [OPIOID_ITEM, ...RATIO_TABLES, STATIN_ITEM, INSULIN_ITEM, IVPO_ITEM, TOPICAL_ITEM];

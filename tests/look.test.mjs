@@ -98,3 +98,10 @@ test('beta blockers are grouped and sotalol is not convertible', () => {
   assert.ok(sotalol.noConvert && !sotalol.equiv);
   for (const d of t.drugs.filter((x) => x.group === 'other')) assert.ok(d.detail && d.detail.length > 10, d.id);
 });
+
+test('topical steroid tiers run from super high to low with sources', async () => {
+  const { TOPICAL_TIERS, TOPICAL_ITEM } = await import('../site/data/conversions.js');
+  assert.deepEqual(TOPICAL_TIERS.map((t) => t.label), ['Super high', 'High', 'Medium', 'Low']);
+  for (const t of TOPICAL_TIERS) assert.ok(t.drugs.length > 0);
+  for (const r of TOPICAL_ITEM.refs) assert.ok(REFERENCES[r], r);
+});

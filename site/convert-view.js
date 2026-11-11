@@ -1,5 +1,5 @@
 import { put } from './dom.js';
-import { OPIOIDS, OPIOID_ITEM, OPIOID_TABLE_ONLY, SOURCES, STATIN_EQUIV, RATIO_TABLES, STATINS, STATIN_ITEM, INTENSITY_LABEL, BASAL_RULES, INSULIN_ITEM, IVPO, IVPO_EXCLUSIONS, IVPO_ITEM } from './data/conversions.js';
+import { OPIOIDS, OPIOID_ITEM, OPIOID_TABLE_ONLY, SOURCES, STATIN_EQUIV, RATIO_TABLES, STATINS, STATIN_ITEM, INTENSITY_LABEL, BASAL_RULES, INSULIN_ITEM, IVPO, IVPO_EXCLUSIONS, IVPO_ITEM, TOPICAL_TIERS, TOPICAL_ITEM } from './data/conversions.js';
 import { REFERENCES } from './data/references.js';
 import { convertDose, fentanylPatch, formatRange, opioidSummary, opioidTarget, statinIntensity, practical, roundStep, altResults } from './calc/convert.js';
 import { formatNumber } from './calc/resus.js';
@@ -60,7 +60,7 @@ export function renderConvert(h, mount) {
     hint && h('p', { class: 'hint' }, hint));
 
   function drawTabs() {
-    const list = [['opioids', 'Opioids'], ...RATIO_TABLES.map((t) => [t.id, t.name]), ['statin', 'Statins'], ['insulin', 'Insulin'], ['ivpo', 'IV to PO']];
+    const list = [['opioids', 'Opioids'], ...RATIO_TABLES.map((t) => [t.id, t.name]), ['statin', 'Statins'], ['insulin', 'Insulin'], ['ivpo', 'IV to PO'], ['topical', 'Topical steroids']];
     put(tabs, ...list.map(([id, name]) => h('button', {
       type: 'button', 'aria-pressed': String(state.tab === id),
       onclick: () => { state.tab = id; drawTabs(); drawBody(); },
@@ -109,6 +109,7 @@ export function renderConvert(h, mount) {
   }
 
   const DUR_LABEL = { short: 'Short', mid: 'Intermediate', long: 'Long' };
+  const PROP_LABEL = { b1: 'β1 selective', ns: 'Nonselective (β1 + β2)', isa: 'ISA (partial agonist)', alpha: 'α1 blockade', vaso: 'Vasodilation', class3: 'Class III antiarrhythmic', renal: 'Renal clearance' };
 
   function durationBar(d, maxH, log) {
     if (!d.dur) return h('span', { class: 'basis' }, d.durText ?? 'Not reported');
@@ -130,8 +131,8 @@ export function renderConvert(h, mount) {
     const maxH = durations ? Math.max(...drugs.filter((d) => d.dur).map((d) => d.dur[1])) : 0;
     const fmt = (v) => formatRange(Array.isArray(v) ? v : [v, v], '').trim();
     const cols = ['Drug', `Equivalent dose (${table.unit})`, durations && table.durationLabel, conflicts && 'Other sources', notes && 'Notes'].filter(Boolean);
-    const row = (d) => h('tr', { class: d.alt ? 'conflict' : '' },
-      h('td', {}, d.name),
+    const row = (d) => h('tr', { class: `${d.alt ? 'conflict' : ''} ${d.group ? `in-${d.group}` : ''}`.trim() },
+      h('td', {}, d.name, d.props && h('div', { class: 'chips' }, d.props.map((p) => h('span', { class: `chip prop-${p}` }, PROP_LABEL[p])))),
       h('td', {}, d.noConvert ? h('b', {}, d.noConvert) : fmt(d.equiv)),
       durations && h('td', {}, durationBar(d, maxH, table.durScale === 'log')),
       conflicts && h('td', {}, (d.alt ?? []).map((a) => `${SOURCES[a.src].label}: ${fmt(a.v)}${a.note ? ` (${a.note})` : ''}`).join('; ')),
@@ -143,6 +144,7 @@ export function renderConvert(h, mount) {
       : drugs.map(row);
     return h('section', { class: 'group' },
       h('h2', {}, 'Equivalence table'),
+      table.propLegend && h('div', { class: 'chips prop-legend' }, Object.keys(PROP_LABEL).map((p) => h('span', { class: `chip prop-${p}` }, PROP_LABEL[p]))),
       durations && h('p', { class: 'dur-legend' }, ['short', 'mid', 'long'].map((c) => h('span', { class: `dur-key dur-${c}` }, DUR_LABEL[c])),
         h('span', { class: 'hint' }, ` Longer bar, longer acting. The lighter part shows the range.${table.durScale === 'log' ? ' Log scale.' : ''}${table.durNote ? ` ${table.durNote}` : ''}`)),
       h('div', { class: 'scroll' }, h('table', { class: 'data list' },
@@ -431,11 +433,26 @@ export function renderConvert(h, mount) {
       ...footer(IVPO_ITEM));
   }
 
+  function drawTopical() {
+    put(body,
+      h('p', {}, 'US seven-class potency system, grouped into four tiers. Class I is strongest.'),
+      h('div', { class: 'tier-scale', role: 'img', 'aria-label': 'Potency scale from super high to low' },
+        TOPICAL_TIERS.map((t) => h('span', { class: `tier-step ${t.id}` }, h('b', {}, t.label), h('small', {}, t.classes)))),
+      TOPICAL_TIERS.map((t) => h('section', { class: `tier ${t.id}` },
+        h('header', { class: 'tier-head' }, h('h2', {}, `${t.label} potency`), h('span', { class: 'tier-classes' }, t.classes), h('span', { class: 'tier-limit' }, t.limit)),
+        h('p', { class: 'tier-note' }, t.note),
+        h('div', { class: 'scroll' }, h('table', { class: 'data list' },
+          h('thead', {}, h('tr', {}, ['Drug', 'Strength', 'Vehicles'].map((x) => h('th', { scope: 'col' }, x)))),
+          h('tbody', {}, t.drugs.map(([n, st, ve]) => h('tr', {}, h('td', {}, n), h('td', {}, st), h('td', {}, ve)))))))),
+      ...footer(TOPICAL_ITEM));
+  }
+
   function drawBody() {
     if (state.tab === 'opioids') drawOpioids();
     else if (state.tab === 'statin') drawStatin();
     else if (state.tab === 'insulin') drawInsulin();
     else if (state.tab === 'ivpo') drawIvpo();
+    else if (state.tab === 'topical') drawTopical();
     else drawRatio(RATIO_TABLES.find((t) => t.id === state.tab));
   }
 
