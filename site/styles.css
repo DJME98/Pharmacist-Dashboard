@@ -435,3 +435,10 @@ table.data tr.group-row.grp-other th { color: var(--p-ns); border-bottom: 2px so
 .tier-note { margin: 8px 14px 0; font-size: .9rem; }
 .tier .scroll { padding: 0 14px 10px; }
 table.data tr td:first-child { }
+
+.tier tr.hl td { font-weight: 700; background: color-mix(in srgb, var(--tc) 16%, var(--surface)); }
+.tier tr.hl td:first-child { box-shadow: inset 6px 0 0 var(--tc); padding-left: 12px; }
+.tier mark { background: var(--tc); color: #fff; padding: 1px 6px; border-radius: 4px; font-weight: 800; }
+.tier.t3 mark { color: #111; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tier mark { color: #111; } }
+:root[data-theme="dark"] .tier mark { color: #111; }

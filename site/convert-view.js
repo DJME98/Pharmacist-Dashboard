@@ -443,7 +443,8 @@ export function renderConvert(h, mount) {
         h('p', { class: 'tier-note' }, t.note),
         h('div', { class: 'scroll' }, h('table', { class: 'data list' },
           h('thead', {}, h('tr', {}, ['Drug', 'Strength', 'Vehicles'].map((x) => h('th', { scope: 'col' }, x)))),
-          h('tbody', {}, t.drugs.map(([n, st, ve]) => h('tr', {}, h('td', {}, n), h('td', {}, st), h('td', {}, ve)))))))),
+          h('tbody', {}, t.drugs.map(([n, st, ve, hl = []]) => h('tr', { class: hl.length ? 'hl' : '' }, h('td', {}, n), h('td', {}, st),
+            h('td', {}, ve.split(', ').map((x, i) => [i > 0 && ', ', hl.includes(x) ? h('mark', {}, x) : x]).flat())))))))),
       ...footer(TOPICAL_ITEM));
   }
 
