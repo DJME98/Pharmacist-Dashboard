@@ -1,5 +1,5 @@
 // Keeps the app available offline. Bump VERSION whenever any listed file changes.
-const VERSION = 'pd-12';
+const VERSION = 'pd-13';
 const FILES = [
   './', 'index.html', 'styles.css', 'app.js', 'manifest.webmanifest',
   'calc/formulas.js', 'calc/patient.js', 'calc/registry.js', 'data/references.js',
@@ -7,6 +7,7 @@ const FILES = [
   'calc/convert.js', 'data/conversions.js', 'convert-view.js',
   'calc/vanco.js', 'calc/amino.js', 'data/pk.js', 'pk-view.js',
   'calc/resus.js', 'data/resus.js', 'resus-view.js',
+  'calc/local.js', 'data/local.js', 'local-view.js',
   'fonts/atkinson-400.woff2', 'fonts/atkinson-700.woff2',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
 ];

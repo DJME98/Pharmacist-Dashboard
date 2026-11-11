@@ -12,6 +12,7 @@ import { renderConvert } from './convert-view.js';
 import { CARE_ITEMS } from './data/care.js';
 import { TOOL_ITEMS } from './data/tools.js';
 import { renderTools, renderCare } from './tools-view.js';
+import { renderLocal } from './local-view.js';
 
 // Patient values live only in this variable. They are never stored or sent.
 const raw = emptyRaw();
@@ -217,7 +218,7 @@ function referencesPage() {
 
 function route() {
   const page = (location.hash || '#renal').slice(1);
-  currentPage = ['renal', 'body', 'acls', 'pals', 'vanco', 'amino', 'convert', 'care', 'labs', 'scores', 'peds', 'refs'].includes(page) ? page : 'renal';
+  currentPage = ['renal', 'body', 'acls', 'pals', 'vanco', 'amino', 'local', 'convert', 'care', 'labs', 'scores', 'peds', 'refs'].includes(page) ? page : 'renal';
   pkUpdate = null;
   document.querySelectorAll('[data-nav]').forEach((a) => {
     if (a.dataset.nav === currentPage) a.setAttribute('aria-current', 'page');
@@ -249,6 +250,16 @@ function route() {
     alertsEl = null;
     app.className = 'layout single';
     renderConvert(h, app);
+    return;
+  }
+  if (currentPage === 'local') {
+    resultsEl = null;
+    app.className = 'layout';
+    alertsEl = h('div', { class: 'alerts', role: 'status' });
+    const body = h('div', {});
+    put(app, patientPanel(), h('div', { class: 'readout' }, h('h1', {}, 'Local anesthetic maximum dose'), alertsEl, body));
+    pkUpdate = renderLocal(h, body);
+    update();
     return;
   }
   if (currentPage === 'vanco' || currentPage === 'amino') {
