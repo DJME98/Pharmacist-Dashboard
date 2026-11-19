@@ -66,4 +66,4 @@ The tests use hand-worked examples and compare the app with a separate Python im
 
 ## Updating the offline copy
 
-When any file in `site/` changes, bump `VERSION` in `site/sw.js` and add new files to its list.
+The app loads from the network first and falls back to the saved copy offline, so updates appear on the next load. When any file in `site/` changes, still bump `VERSION` in `site/sw.js` and add new files to its list.

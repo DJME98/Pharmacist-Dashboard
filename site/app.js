@@ -296,5 +296,11 @@ window.addEventListener('hashchange', route);
 route();
 
 if ('serviceWorker' in navigator && location.protocol === 'https:' && !window.__NO_SW__) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => reg.update()).catch(() => {});
+  // When a new version takes over, reload once so it shows immediately.
+  let reloaded = false;
+  const hadController = Boolean(navigator.serviceWorker.controller);
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hadController && !reloaded) { reloaded = true; location.reload(); }
+  });
 }

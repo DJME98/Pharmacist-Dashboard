@@ -1,5 +1,5 @@
 // Keeps the app available offline. Bump VERSION whenever any listed file changes.
-const VERSION = 'pd-18';
+const VERSION = 'pd-19';
 const FILES = [
   './', 'index.html', 'styles.css', 'app.js', 'manifest.webmanifest',
   'calc/formulas.js', 'calc/patient.js', 'calc/registry.js', 'data/references.js',
@@ -24,9 +24,17 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Network first, so updates show up right away; the saved copy is used only when offline.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
   event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then((hit) => hit ?? fetch(event.request)),
+    fetch(event.request, { cache: 'no-cache' })
+      .then((res) => {
+        if (res.ok) { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(event.request, copy)); }
+        return res;
+      })
+      .catch(() => caches.match(event.request, { ignoreSearch: true })),
   );
 });
