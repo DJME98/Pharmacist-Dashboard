@@ -442,3 +442,16 @@ table.data tr td:first-child { }
 .tier.t3 mark { color: #111; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tier mark { color: #111; } }
 :root[data-theme="dark"] .tier mark { color: #111; }
+
+.class-compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.class-box { border: 2px solid var(--bc); border-radius: 10px; background: color-mix(in srgb, var(--bc) 8%, var(--surface)); padding: 10px 14px 12px; }
+.box-amide { --bc: var(--amide); } .box-ester { --bc: var(--ester); }
+.class-box header { display: flex; align-items: center; gap: 10px; }
+.class-box h3 { margin: 0; font-size: 1.1rem; color: var(--bc); }
+.class-box dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 12px; margin: 10px 0 0; font-size: .9rem; }
+.class-box dt { font-weight: 700; color: var(--muted); }
+.class-box dd { margin: 0; }
+.la-metab { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; margin: 8px 0 0; padding: 5px 8px; border-radius: 6px; font-size: .88rem; background: color-mix(in srgb, var(--mc) 12%, var(--surface)); border-left: 4px solid var(--mc); }
+.la-metab span { color: var(--muted); font-weight: 700; font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; }
+.metab-amide { --mc: var(--amide); } .metab-ester { --mc: var(--ester); }
+.la-card .la-metab { margin-top: 8px; }

@@ -66,19 +66,19 @@ export const LOCAL_AGENTS = [
 // How the agents differ. Class, duration, and additives from each US label; allergy data from Bhole 2012 and Koca Kalkan 2021.
 // dur: hours, in the setting the label reports (ctx). Settings differ, so compare bars only roughly.
 export const LOCAL_PROFILES = [
-  { id: 'chloro', name: 'Chloroprocaine', cls: 'ester', dur: [1, 1], durClass: 'short', durText: 'Up to 60 min', ctx: 'label, by dose and route', flags: ['paba'],
+  { id: 'chloro', name: 'Chloroprocaine', cls: 'ester', metab: 'Plasma pseudocholinesterase', dur: [1, 1], durClass: 'short', durText: 'Up to 60 min', ctx: 'label, by dose and route', flags: ['paba'],
     note: 'Broken down in plasma by pseudocholinesterase; slower in cholinesterase deficiency. Its PABA-like metabolite inhibits sulfonamides. Contraindicated with allergy to PABA-ester drugs.' },
-  { id: 'artic', name: 'Articaine (with epinephrine)', cls: 'amide', dur: [1, 2], durClass: 'short', durText: '1 h infiltration, up to 2 h block', ctx: 'dental label', flags: ['sulfite'],
+  { id: 'artic', name: 'Articaine (with epinephrine)', cls: 'amide', metab: 'Mainly plasma carboxyesterase (the exception among amides)', dur: [1, 2], durClass: 'short', durText: '1 h infiltration, up to 2 h block', ctx: 'dental label', flags: ['sulfite'],
     note: 'An amide that is broken down mainly by plasma carboxyesterase, so it is cleared quickly.' },
-  { id: 'lido', name: 'Lidocaine', cls: 'amide', dur: [1, 1.5], durClass: 'short', durText: 'Pulpal 60 to 90 min with epinephrine', ctx: 'dental label; the plain-lidocaine label gives no fixed time', flags: ['sulfite', 'paraben'],
+  { id: 'lido', name: 'Lidocaine', cls: 'amide', metab: 'Liver', dur: [1, 1.5], durClass: 'short', durText: 'Pulpal 60 to 90 min with epinephrine', ctx: 'dental label; the plain-lidocaine label gives no fixed time', flags: ['sulfite', 'paraben'],
     note: 'No cross-sensitivity reported with procainamide or with PABA-derivative (ester) allergy (label).' },
-  { id: 'prilo', name: 'Prilocaine', cls: 'amide', dur: [2, 2.5], durClass: 'mid', durText: 'Soft tissue 2 to 2.5 h', ctx: 'dental label', flags: ['methb'],
+  { id: 'prilo', name: 'Prilocaine', cls: 'amide', metab: 'Liver and kidney', dur: [2, 2.5], durClass: 'mid', durText: 'Soft tissue 2 to 2.5 h', ctx: 'dental label', flags: ['methb'],
     note: 'Can cause methemoglobinemia, most of all in infants under 6 months and in G6PD deficiency. No cross-sensitivity with PABA-derivative allergy (label).' },
-  { id: 'mepi', name: 'Mepivacaine', cls: 'amide', dur: [2, 2.5], durClass: 'mid', durText: '2 to 2.5 h of surgery', ctx: 'label', flags: ['paraben'],
+  { id: 'mepi', name: 'Mepivacaine', cls: 'amide', metab: 'Liver', dur: [2, 2.5], durClass: 'mid', durText: '2 to 2.5 h of surgery', ctx: 'label', flags: ['paraben'],
     note: 'Single-dose (MPF) vials have no methylparaben.' },
-  { id: 'bupi', name: 'Bupivacaine', cls: 'amide', dur: [7, 7], durClass: 'long', durText: 'Up to 7 h', ctx: 'dental label', flags: ['sulfite', 'paraben'],
+  { id: 'bupi', name: 'Bupivacaine', cls: 'amide', metab: 'Liver', dur: [7, 7], durClass: 'long', durText: 'Up to 7 h', ctx: 'dental label', flags: ['sulfite', 'paraben'],
     note: 'Long acting; analgesia can persist after sensation returns (label).' },
-  { id: 'ropi', name: 'Ropivacaine', cls: 'amide', dur: [3.7, 8.7], durClass: 'long', durText: '3.7 to 8.7 h axillary block; 4 h epidural', ctx: 'label clinical studies', flags: [],
+  { id: 'ropi', name: 'Ropivacaine', cls: 'amide', metab: 'Liver', dur: [3.7, 8.7], durClass: 'long', durText: '3.7 to 8.7 h axillary block; 4 h epidural', ctx: 'label clinical studies', flags: [],
     note: 'Single-dose vials without preservative.' },
 ];
 
